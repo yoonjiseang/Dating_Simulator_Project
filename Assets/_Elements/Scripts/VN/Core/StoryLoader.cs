@@ -1,11 +1,15 @@
 using UnityEngine;
 using VN.Data;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace VN.Core
 {
     public class StoryLoader
     {
-        // _ElementsResources/VN/Stories/{storyId}.json(TextAsset) 로드
+        // 기본: Resources/_ElementsResources/VN/Stories/{storyId}.json(TextAsset)
+        // 에디터 보조: Assets/_ElementsResources/VN/Stories/{storyId}.json 직접 로드
         public StoryData LoadStory(string storyId)
         {
             if (string.IsNullOrWhiteSpace(storyId))
@@ -14,10 +18,27 @@ namespace VN.Core
                 return null;
             }
 
-            var asset = Resources.Load<TextAsset>($"_ElementsResources/VN/Stories/{storyId}");
+            var resourcesPath = $"_ElementsResources/VN/Stories/{storyId}";
+            var asset = Resources.Load<TextAsset>(resourcesPath);
+
+#if UNITY_EDITOR
             if (asset == null)
             {
-                Debug.LogError($"[StoryLoader] Story json not found: Resources/_ElementsResources/VN/Stories/{storyId}");
+                var editorAssetPath = $"Assets/_ElementsResources/VN/Stories/{storyId}.json";
+                asset = AssetDatabase.LoadAssetAtPath<TextAsset>(editorAssetPath);
+                if (asset != null)
+                {
+                    Debug.Log($"[StoryLoader] Loaded story via AssetDatabase fallback: {editorAssetPath}");
+                }
+            }
+#endif
+
+            if (asset == null)
+            {
+                Debug.LogError(
+                    $"[StoryLoader] Story json not found. " +
+                    $"Expected Resources path: Resources/{resourcesPath}.json " +
+                    $"or editor fallback path: Assets/_ElementsResources/VN/Stories/{storyId}.json");
                 return null;
             }
 

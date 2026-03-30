@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace VN.Systems
 {
@@ -9,7 +10,10 @@ namespace VN.Systems
 
         private void Update()
         {
-            if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
+            var mousePressed = Mouse.current?.leftButton.wasPressedThisFrame ?? false;
+            var spacePressed = Keyboard.current?.spaceKey.wasPressedThisFrame ?? false;
+
+            if (mousePressed || spacePressed)
             {
                 OnNextPressed?.Invoke();
             }
