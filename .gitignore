@@ -1,0 +1,100 @@
+# =============== #
+# Unity generated #
+# =============== #
+Temp/
+Obj/
+obj/
+UnityGenerated/
+Library/
+.svn/
+Logs/
+UserSettings/
+
+# ===================================== #
+# Visual Studio / MonoDevelop generated #
+# ===================================== #
+ExportedObj/
+*.svd
+*.userprefs
+*.csproj
+*.pidb
+*.suo
+*.sln
+*.user
+*.unityproj
+*.booproj
+!*__*.sln
+!*__*.csproj
+.vs/
+.vscode/
+.vsconfig
+
+# ===================================== #
+# VS Code
+# ===================================== #
+.vscode/
+
+# ===================================== #
+# Rider
+# ===================================== #
+.idea/
+
+# ============ #
+# OS generated #
+# ============ #
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+Thumbs.db.meta
+
+# ============ #
+# for others   #
+# ============ #
+
+*.log #log files, for some plugins
+*.pyc #python bytecode cache, for some plugins.
+*.fla
+*.psd
+*.spine
+*.byt
+*.zip
+*.pdf
+sysinfo.txt #Unity3D Generated File On Crash Reports
+ignore/
+ignore.meta
+__ignore/
+__ignore.meta
+_ElementsResources
+_ElementsResources.meta
+UnityVS/
+UnityVS.meta
+
+error_report_client.html
+error_report_masterdb.html
+error_report_validate_only.html
+
+elements/Assets/Scripts/test.cs
+elements/Assets/Scripts/test.cs.meta
+elements/Assets/_Elements/Test/Mock/jpg
+
+Assets/_Debug/Resources/BuildInfomation
+
+Assets/_Debug/Tools/TestBattleTool
+Assets/_Debug/Tools/TestBattleTool.meta
+
+Assets/_Debug/Tools/EditorBattleTools/TestBattleTool/*.csv
+Assets/_Debug/Tools/EditorBattleTools/TestBattleTool/*.csv.meta
+
+Assets/StreamingAssets/PreinAssetBundle
+
+/.normalized_line_endings
+
+/ApiDebug/*
+!/ApiDebug/ApiOverrider/ReadMe.txt
+
+com.Tivadar.Best.HTTP.xml
