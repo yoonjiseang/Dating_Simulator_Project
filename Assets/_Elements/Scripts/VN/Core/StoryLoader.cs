@@ -8,8 +8,10 @@ namespace VN.Core
 {
     public class StoryLoader
     {
-        // 기본: Resources/_ElementsResources/VN/Stories/{storyId}.json(TextAsset)
-        // 에디터 보조: Assets/_ElementsResources/VN/Stories/{storyId}.json 직접 로드
+        private const string StoryRootPath = "Assets/_ElementsResources/VN/Stories";
+
+        // Editor: Assets/_ElementsResources/VN/Stories/{storyId}.json 직접 로드
+        // Runtime: 추후 _ElementsBundles(AssetBundle/Addressables) 로더로 연결 예정
         public StoryData LoadStory(string storyId)
         {
             if (string.IsNullOrWhiteSpace(storyId))
@@ -18,38 +20,30 @@ namespace VN.Core
                 return null;
             }
 
-            var resourcesPath = $"_ElementsResources/VN/Stories/{storyId}";
-            var asset = Resources.Load<TextAsset>(resourcesPath);
+            var assetPath = $"{StoryRootPath}/{storyId}.json";
 
 #if UNITY_EDITOR
+            var asset = AssetDatabase.LoadAssetAtPath<TextAsset>(assetPath);
             if (asset == null)
             {
-                var editorAssetPath = $"Assets/_ElementsResources/VN/Stories/{storyId}.json";
-                asset = AssetDatabase.LoadAssetAtPath<TextAsset>(editorAssetPath);
-                if (asset != null)
-                {
-                    Debug.Log($"[StoryLoader] Loaded story via AssetDatabase fallback: {editorAssetPath}");
-                }
-            }
-#endif
-
-            if (asset == null)
-            {
-                Debug.LogError(
-                    $"[StoryLoader] Story json not found. " +
-                    $"Expected Resources path: Resources/{resourcesPath}.json " +
-                    $"or editor fallback path: Assets/_ElementsResources/VN/Stories/{storyId}.json");
+                Debug.LogError($"[StoryLoader] Story json not found at: {assetPath}");
                 return null;
             }
 
             var data = JsonUtility.FromJson<StoryData>(asset.text);
             if (data == null)
             {
-                Debug.LogError($"[StoryLoader] Failed to parse json for storyId={storyId}");
+                Debug.LogError($"[StoryLoader] Failed to parse json for storyId={storyId} from path={assetPath}");
                 return null;
             }
 
             return data;
+#else
+            Debug.LogError(
+                $"[StoryLoader] Runtime loader for '{assetPath}' is not implemented yet. " +
+                "Planned source: Assets/_ElementsBundles.");
+            return null;
+#endif
         }
     }
 }
