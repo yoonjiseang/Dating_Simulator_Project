@@ -105,15 +105,20 @@ namespace VN.Systems
             }
 
             var dict = new Dictionary<string, int>();
-            foreach (var v in data.variables)
+            foreach (var v in data.variables ?? new List<VariableState>())
             {
+                if (string.IsNullOrWhiteSpace(v?.name))
+                {
+                    continue;
+                }
+
                 dict[v.name] = v.value;
             }
             variableStore.Import(dict);
 
             runtime.JumpToNode(data.nodeId);
             // 명시적으로 인덱스를 맞춰서 저장 지점 복원
-            for (var i = 0; i < data.commandIndex; i++)
+            for (var i = 0; i < data.commandIndex && !runtime.IsEnded; i++)
             {
                 runtime.AdvanceCommand();
             }
@@ -123,7 +128,7 @@ namespace VN.Systems
                 Debug.LogWarning("[SaveLoadManager] Background data exists but BackgroundController is not available.");
             }
 
-            if (data.characters.Count > 0 && stage == null)
+            if ((data.characters?.Count ?? 0) > 0 && stage == null)
             {
                 Debug.LogWarning("[SaveLoadManager] Character view data exists but CharacterStageController is not available.");
             }

@@ -103,6 +103,18 @@ namespace VN.Core
         {
             var hasAllDependencies = true;
 
+            if (characterStageController == null)
+            {
+                Debug.LogError("[VNGameController] characterStageController is not assigned.");
+                hasAllDependencies = false;
+            }
+
+            if (backgroundController == null)
+            {
+                Debug.LogError("[VNGameController] backgroundController is not assigned.");
+                hasAllDependencies = false;
+            }
+
             if (dialogueUiController == null)
             {
                 Debug.LogError("[VNGameController] dialogueUiController is not assigned.");
@@ -118,6 +130,12 @@ namespace VN.Core
             if (inputRouter == null)
             {
                 Debug.LogError("[VNGameController] inputRouter is not assigned.");
+                hasAllDependencies = false;
+            }
+
+            if (audioController == null)
+            {
+                Debug.LogError("[VNGameController] audioController is not assigned.");
                 hasAllDependencies = false;
             }
 

@@ -1,4 +1,6 @@
 using System.Collections;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using VN.Commands;
 using VN.Controllers;
@@ -8,6 +10,25 @@ namespace VN.Core
 {
     public class CommandProcessor
     {
+        private static readonly Dictionary<string, Func<IVNCommand>> CommandFactories = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["dialogue"] = () => new DialogueCommand(),
+            ["background"] = () => new BackgroundCommand(),
+            ["showCharacter"] = () => new ShowCharacterCommand(),
+            ["hideCharacter"] = () => new HideCharacterCommand(),
+            ["changeFace"] = () => new ChangeFaceCommand(),
+            ["moveCharacter"] = () => new MoveCharacterCommand(),
+            ["playBgm"] = () => new PlayBgmCommand(),
+            ["stopBgm"] = () => new StopBgmCommand(),
+            ["playSfx"] = () => new PlaySfxCommand(),
+            ["wait"] = () => new WaitCommand(),
+            ["choice"] = () => new ChoiceCommand(),
+            ["jump"] = () => new JumpCommand(),
+            ["if"] = () => new IfCommand(),
+            ["setVariable"] = () => new SetVariableCommand(),
+            ["end"] = () => new EndCommand()
+        };
+
         private readonly StoryRuntime _runtime;
         private readonly ResourceProvider _resourceProvider;
         private readonly VariableStore _variables;
@@ -78,25 +99,12 @@ namespace VN.Core
 
         private static IVNCommand CreateCommand(string type)
         {
-            return type switch
+            if (string.IsNullOrWhiteSpace(type))
             {
-                "dialogue" => new DialogueCommand(),
-                "background" => new BackgroundCommand(),
-                "showCharacter" => new ShowCharacterCommand(),
-                "hideCharacter" => new HideCharacterCommand(),
-                "changeFace" => new ChangeFaceCommand(),
-                "moveCharacter" => new MoveCharacterCommand(),
-                "playBgm" => new PlayBgmCommand(),
-                "stopBgm" => new StopBgmCommand(),
-                "playSfx" => new PlaySfxCommand(),
-                "wait" => new WaitCommand(),
-                "choice" => new ChoiceCommand(),
-                "jump" => new JumpCommand(),
-                "if" => new IfCommand(),
-                "setVariable" => new SetVariableCommand(),
-                "end" => new EndCommand(),
-                _ => null
-            };
+                return null;
+            }
+
+            return CommandFactories.TryGetValue(type.Trim(), out var factory) ? factory() : null;
         }
     }
 }
