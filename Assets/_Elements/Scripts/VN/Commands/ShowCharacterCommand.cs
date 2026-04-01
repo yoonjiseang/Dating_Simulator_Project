@@ -1,4 +1,5 @@
 using System.Collections;
+using UnityEngine;
 using VN.Core;
 
 namespace VN.Commands
@@ -8,9 +9,12 @@ namespace VN.Commands
         public IEnumerator Execute(CommandContext context)
         {
             var d = context.Data;
-            var body = context.ResourceProvider.LoadCharacterBody(d.characterId, d.body);
-            var face = context.ResourceProvider.LoadCharacterFace(d.characterId, d.face);
-            yield return context.CharacterStage.ShowCharacter(d.characterId, d.slot, body, face, d.duration);
+            var sprite = context.ResourceProvider.LoadCharacterSprite(d.characterId, d.face);
+            if (sprite == null)
+            {
+                Debug.LogError($"[ShowCharacterCommand] Failed to load character sprite. characterId={d.characterId}, face={d.face}");
+            }
+            yield return context.CharacterStage.ShowCharacter(d.characterId, d.slot, sprite, null, d.duration);
         }
     }
 }

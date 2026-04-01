@@ -21,8 +21,20 @@ namespace VN.Core
         public AudioClip LoadBgm(string bgmKey) => LoadAudioByKey($"BGM/{bgmKey}");
         public AudioClip LoadSfx(string sfxKey) => LoadAudioByKey($"SFX/{sfxKey}");
         public AudioClip LoadVoice(string characterId, string voiceKey) => LoadAudioByKey($"Characters/{characterId}/voice/{voiceKey}");
-        public Sprite LoadCharacterBody(string characterId, string bodyKey) => LoadSpriteByKey($"Characters/{characterId}/body_{bodyKey}");
+        public Sprite LoadCharacterBody(string characterId, string bodyKey) => LoadSpriteByKey($"Characters/{characterId}/{characterId}_{bodyKey}");
         public Sprite LoadCharacterFace(string characterId, string faceKey) => LoadSpriteByKey($"Characters/{characterId}/face_{faceKey}");
+        public Sprite LoadCharacterSprite(string characterId, string faceKey)
+        {
+            if (string.IsNullOrWhiteSpace(characterId) || string.IsNullOrWhiteSpace(faceKey))
+            {
+                Debug.LogError($"[ResourceProvider] Invalid character sprite key. characterId={characterId}, face={faceKey}");
+                return null;
+            }
+
+            var normalizedCharacterId = characterId.Trim().PadLeft(4, '0');
+            var normalizedFaceKey = faceKey.Trim().PadLeft(2, '0');
+            return LoadSpriteByKey($"Characters/{normalizedCharacterId}/{normalizedCharacterId}_{normalizedFaceKey}");
+        }
 
         private Sprite LoadSpriteByKey(string relativeKey)
         {

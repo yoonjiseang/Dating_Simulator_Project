@@ -46,7 +46,13 @@ namespace VN.Controllers
             view.faceKey = face != null ? face.name : string.Empty;
 
             view.bodyImage.sprite = body;
-            view.faceImage.sprite = face;
+            view.bodyImage.enabled = body != null;
+
+            if (view.faceImage != null)
+            {
+                view.faceImage.sprite = null;
+                view.faceImage.enabled = false;
+            }
             SetSlotPosition(view, slot);
 
             if (duration > 0f)
@@ -59,7 +65,10 @@ namespace VN.Controllers
         {
             if (_views.TryGetValue(characterId, out var view))
             {
-                if (view.bodyImage != null) Destroy(view.bodyImage.gameObject);
+                if (view.bodyImage != null && view.bodyImage.transform.parent != null)
+                {
+                    Destroy(view.bodyImage.transform.parent.gameObject);
+                }
                 _views.Remove(characterId);
             }
         }
@@ -68,8 +77,34 @@ namespace VN.Controllers
         {
             if (_views.TryGetValue(characterId, out var view))
             {
-                view.faceImage.sprite = face;
+                if (view.faceImage != null)
+                {
+                    view.faceImage.sprite = face;
+                    view.faceImage.enabled = face != null;
+                }
+                else
+                {
+                    view.bodyImage.sprite = face;
+                    view.bodyImage.enabled = face != null;
+                }
+
                 view.faceKey = face != null ? face.name : string.Empty;
+            }
+        }
+
+        public void ChangeCharacterSprite(string characterId, Sprite sprite)
+        {
+            if (_views.TryGetValue(characterId, out var view))
+            {
+                view.bodyImage.sprite = sprite;
+                view.bodyImage.enabled = sprite != null;
+                view.bodyKey = sprite != null ? sprite.name : string.Empty;
+                if (view.faceImage != null)
+                {
+                    view.faceImage.sprite = null;
+                    view.faceImage.enabled = false;
+                }
+                view.faceKey = string.Empty;
             }
         }
 
@@ -96,17 +131,14 @@ namespace VN.Controllers
 
             var bodyGo = new GameObject("Body", typeof(RectTransform), typeof(Image));
             bodyGo.transform.SetParent(root.transform, false);
+            var bodyRect = bodyGo.GetComponent<RectTransform>();
+            bodyRect.sizeDelta = new Vector2(810f, 1080f);
             var bodyImage = bodyGo.GetComponent<Image>();
-
-            var faceGo = new GameObject("Face", typeof(RectTransform), typeof(Image));
-            faceGo.transform.SetParent(root.transform, false);
-            var faceImage = faceGo.GetComponent<Image>();
 
             return new CharacterView
             {
                 characterId = characterId,
-                bodyImage = bodyImage,
-                faceImage = faceImage
+                bodyImage = bodyImage
             };
         }
 

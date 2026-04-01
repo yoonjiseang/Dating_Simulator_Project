@@ -42,6 +42,9 @@ namespace VN.Core
             }
 
             JumpToNode(story.startNode);
+            // Initialization starts at the first command immediately,
+            // so do not consume the first AdvanceCommand call.
+            _skipAdvanceOnce = false;
         }
 
         public CommandData GetCurrentCommand()
