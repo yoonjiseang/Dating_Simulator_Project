@@ -7,8 +7,8 @@ namespace VN.Commands
     {
         public IEnumerator Execute(CommandContext context)
         {
-            context.CharacterStage.HideCharacter(context.Data.characterId);
-            yield break;
+            var d = context.Data;
+            yield return context.CharacterStage.HideCharacter(d.characterId, d.duration, d.GetEffectKey());
         }
     }
 }

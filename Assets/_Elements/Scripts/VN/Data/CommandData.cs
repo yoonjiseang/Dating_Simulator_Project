@@ -16,6 +16,7 @@ namespace VN.Data
         // background
         public string bg;
         public string transition;
+        public string sort;
         public float duration = 0.2f;
 
         // character
@@ -46,5 +47,10 @@ namespace VN.Data
         public string name;
         public string op;
         public int value;
+
+        public string GetEffectKey()
+        {
+            return string.IsNullOrWhiteSpace(sort) ? transition : sort;
+        }
     }
 }

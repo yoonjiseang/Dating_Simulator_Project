@@ -14,7 +14,7 @@ namespace VN.Commands
             {
                 Debug.LogError($"[ShowCharacterCommand] Failed to load character sprite. characterId={d.characterId}, face={d.face}");
             }
-            yield return context.CharacterStage.ShowCharacter(d.characterId, d.slot, sprite, null, d.duration);
+            yield return context.CharacterStage.ShowCharacter(d.characterId, d.slot, sprite, null, d.duration, d.GetEffectKey());
         }
     }
 }

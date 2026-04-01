@@ -14,8 +14,7 @@ namespace VN.Commands
             {
                 Debug.LogError($"[ChangeFaceCommand] Failed to load character sprite. characterId={d.characterId}, face={d.face}");
             }
-            context.CharacterStage.ChangeCharacterSprite(d.characterId, sprite);
-            yield break;
+            yield return context.CharacterStage.ChangeCharacterSprite(d.characterId, sprite, d.GetEffectKey(), d.duration);
         }
     }
 }

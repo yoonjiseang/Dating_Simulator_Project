@@ -27,6 +27,11 @@ namespace VN.Core
 
         private IEnumerator Start()
         {
+            if (!ValidateDependencies())
+            {
+                yield break;
+            }
+
             _storyLoader = new StoryLoader();
             _runtime = new StoryRuntime();
             _resourceProvider = new ResourceProvider();
@@ -59,12 +64,49 @@ namespace VN.Core
 
         public void Save(string slot)
         {
+            if (_saveLoadManager == null || _runtime == null || _variableStore == null)
+            {
+                Debug.LogError("[VNGameController] Save requested before VN runtime was initialized.");
+                return;
+            }
+
             _saveLoadManager.Save(slot, _runtime, _variableStore, backgroundController, characterStageController);
         }
 
         public void Load(string slot)
         {
+            if (_saveLoadManager == null || _runtime == null || _variableStore == null)
+            {
+                Debug.LogError("[VNGameController] Load requested before VN runtime was initialized.");
+                return;
+            }
+
             _saveLoadManager.Load(slot, _runtime, _variableStore, backgroundController, characterStageController);
+        }
+
+        private bool ValidateDependencies()
+        {
+            var hasAllDependencies = true;
+
+            if (dialogueUiController == null)
+            {
+                Debug.LogError("[VNGameController] dialogueUiController is not assigned.");
+                hasAllDependencies = false;
+            }
+
+            if (choiceUiController == null)
+            {
+                Debug.LogError("[VNGameController] choiceUiController is not assigned.");
+                hasAllDependencies = false;
+            }
+
+            if (inputRouter == null)
+            {
+                Debug.LogError("[VNGameController] inputRouter is not assigned.");
+                hasAllDependencies = false;
+            }
+
+            return hasAllDependencies;
         }
     }
 }

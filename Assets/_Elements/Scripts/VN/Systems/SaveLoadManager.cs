@@ -36,6 +36,18 @@ namespace VN.Systems
 
         public void Save(string slot, StoryRuntime runtime, VariableStore variableStore, BackgroundController bg, CharacterStageController stage)
         {
+            if (string.IsNullOrWhiteSpace(slot))
+            {
+                Debug.LogError("[SaveLoadManager] Save slot is empty.");
+                return;
+            }
+
+            if (runtime == null || variableStore == null || bg == null || stage == null)
+            {
+                Debug.LogError("[SaveLoadManager] Save dependencies are missing.");
+                return;
+            }
+
             var data = new SaveData
             {
                 nodeId = runtime.CurrentNode?.id,
@@ -66,6 +78,18 @@ namespace VN.Systems
 
         public void Load(string slot, StoryRuntime runtime, VariableStore variableStore, BackgroundController bg, CharacterStageController stage)
         {
+            if (string.IsNullOrWhiteSpace(slot))
+            {
+                Debug.LogError("[SaveLoadManager] Load slot is empty.");
+                return;
+            }
+
+            if (runtime == null || variableStore == null)
+            {
+                Debug.LogError("[SaveLoadManager] Load dependencies are missing.");
+                return;
+            }
+
             var json = PlayerPrefs.GetString(GetKey(slot), string.Empty);
             if (string.IsNullOrWhiteSpace(json))
             {
@@ -94,7 +118,17 @@ namespace VN.Systems
                 runtime.AdvanceCommand();
             }
 
-            Debug.Log("[SaveLoadManager] Runtime state loaded. Visual restore should be applied by a custom restore flow.");
+            if (!string.IsNullOrWhiteSpace(data.backgroundKey) && bg == null)
+            {
+                Debug.LogWarning("[SaveLoadManager] Background data exists but BackgroundController is not available.");
+            }
+
+            if (data.characters.Count > 0 && stage == null)
+            {
+                Debug.LogWarning("[SaveLoadManager] Character view data exists but CharacterStageController is not available.");
+            }
+
+            Debug.Log("[SaveLoadManager] Runtime state loaded. Visual restore is not implemented in the default save flow.");
         }
 
         private static string GetKey(string slot) => $"VN_SAVE_{slot}";
