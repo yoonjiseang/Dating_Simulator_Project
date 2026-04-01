@@ -10,6 +10,7 @@ namespace VN.Core
     {
         [Header("Story")]
         [SerializeField] private string storyId = "storydata_0000001";
+        [SerializeField] private bool autoStartOnAwake = true;
 
         [Header("Controllers")]
         [SerializeField] private CharacterStageController characterStageController;
@@ -20,8 +21,7 @@ namespace VN.Core
         [SerializeField] private VNInputRouter inputRouter;
 
         [Header("Loading UI (Optional)")]
-        [SerializeField] private GameObject loadingRoot;
-        [SerializeField] private Slider loadingProgressBar;
+        [SerializeField] private LoadingUIController loadingUiController;
 
         private StoryLoader _storyLoader;
         private StoryRuntime _runtime;
@@ -32,6 +32,18 @@ namespace VN.Core
 
         private IEnumerator Start()
         {
+            if (!autoStartOnAwake)
+            {
+                yield break;
+            }
+
+            yield return StartCoroutine(BeginStory());
+        }
+
+        public IEnumerator BeginStory()
+        {
+            ResolveOptionalDependencies();
+            
             if (!ValidateDependencies())
             {
                 yield break;
@@ -76,6 +88,32 @@ namespace VN.Core
             SetLoadingVisible(false);
             yield return StartCoroutine(_processor.Run());
         }
+        
+        public void ConfigureDependencies(
+            CharacterStageController characterStage,
+            BackgroundController background,
+            DialogueUIController dialogue,
+            ChoiceUIController choice,
+            AudioController audio,
+            VNInputRouter input,
+            LoadingUIController loadingUi)
+        {
+            characterStageController = characterStage;
+            backgroundController = background;
+            dialogueUiController = dialogue;
+            choiceUiController = choice;
+            audioController = audio;
+            inputRouter = input;
+            loadingUiController = loadingUi;
+        }
+
+        public void SetStoryId(string id)
+        {
+            if (!string.IsNullOrWhiteSpace(id))
+            {
+                storyId = id;
+            }
+        }
 
         public void Save(string slot)
         {
@@ -97,6 +135,19 @@ namespace VN.Core
             }
 
             _saveLoadManager.Load(slot, _runtime, _variableStore, backgroundController, characterStageController);
+        }
+
+        private void ResolveOptionalDependencies()
+        {
+            if (loadingUiController == null)
+            {
+                loadingUiController = GetComponentInChildren<LoadingUIController>(true);
+            }
+
+            if (loadingUiController == null)
+            {
+                loadingUiController = FindFirstObjectByType<LoadingUIController>();
+            }
         }
 
         private bool ValidateDependencies()
@@ -139,22 +190,27 @@ namespace VN.Core
                 hasAllDependencies = false;
             }
 
+            if (loadingUiController == null)
+            {
+                Debug.LogWarning("[VNGameController] loadingUiController is not assigned. Loading progress UI will be skipped.");
+            }
+
             return hasAllDependencies;
         }
 
         private void SetLoadingVisible(bool visible)
         {
-            if (loadingRoot != null)
+            if (loadingUiController != null)
             {
-                loadingRoot.SetActive(visible);
+                loadingUiController.SetVisible(visible);
             }
         }
 
         private void UpdateLoadingProgress(float progress)
         {
-            if (loadingProgressBar != null)
+            if (loadingUiController != null)
             {
-                loadingProgressBar.value = Mathf.Clamp01(progress);
+                loadingUiController.SetProgress(progress);
             }
         }
     }
