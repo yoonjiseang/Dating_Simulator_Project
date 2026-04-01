@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 using VN.Controllers;
 using VN.Systems;
 
@@ -18,6 +19,10 @@ namespace VN.Core
         [SerializeField] private AudioController audioController;
         [SerializeField] private VNInputRouter inputRouter;
 
+        [Header("Loading UI (Optional)")]
+        [SerializeField] private GameObject loadingRoot;
+        [SerializeField] private Slider loadingProgressBar;
+
         private StoryLoader _storyLoader;
         private StoryRuntime _runtime;
         private ResourceProvider _resourceProvider;
@@ -32,6 +37,9 @@ namespace VN.Core
                 yield break;
             }
 
+            SetLoadingVisible(true);
+            UpdateLoadingProgress(0f);
+
             _storyLoader = new StoryLoader();
             _runtime = new StoryRuntime();
             _resourceProvider = new ResourceProvider();
@@ -44,8 +52,14 @@ namespace VN.Core
             var story = _storyLoader.LoadStory(storyId);
             if (story == null)
             {
+                SetLoadingVisible(false);
                 yield break;
             }
+
+            yield return StartCoroutine(_resourceProvider.PreloadStoryAssets(story, (progress, _) =>
+            {
+                UpdateLoadingProgress(progress);
+            }));
 
             _runtime.Initialize(story);
 
@@ -59,6 +73,7 @@ namespace VN.Core
                 choiceUiController,
                 audioController);
 
+            SetLoadingVisible(false);
             yield return StartCoroutine(_processor.Run());
         }
 
@@ -107,6 +122,22 @@ namespace VN.Core
             }
 
             return hasAllDependencies;
+        }
+
+        private void SetLoadingVisible(bool visible)
+        {
+            if (loadingRoot != null)
+            {
+                loadingRoot.SetActive(visible);
+            }
+        }
+
+        private void UpdateLoadingProgress(float progress)
+        {
+            if (loadingProgressBar != null)
+            {
+                loadingProgressBar.value = Mathf.Clamp01(progress);
+            }
         }
     }
 }
