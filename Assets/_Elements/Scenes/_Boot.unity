@@ -560,7 +560,7 @@ GameObject:
   - component: {fileID: 2094670768}
   - component: {fileID: 2094670767}
   m_Layer: 0
-  m_Name: Boot
+  m_Name: VN_Bootstrap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

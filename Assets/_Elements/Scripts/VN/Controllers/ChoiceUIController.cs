@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using VN.Data;
@@ -36,10 +37,18 @@ namespace VN.Controllers
             foreach (var option in options)
             {
                 var button = Instantiate(optionButtonPrefab, root);
-                var text = button.GetComponentInChildren<Text>();
-                if (text != null)
+                var tmpText = button.GetComponentInChildren<TMP_Text>();
+                if (tmpText != null)
                 {
-                    text.text = option.text;
+                    tmpText.text = option.text;
+                }
+                else
+                {
+                    var text = button.GetComponentInChildren<Text>();
+                    if (text != null)
+                    {
+                        text.text = option.text;
+                    }
                 }
 
                 button.onClick.AddListener(() =>
