@@ -99,13 +99,20 @@ namespace VN.Core
                     TryAddAudioTask(command.bgm, value => LoadBgm(value), "bgm", tasks, dedupe);
                     TryAddAudioTask(command.sfx, value => LoadSfx(value), "sfx", tasks, dedupe);
 
-                    if (!string.IsNullOrWhiteSpace(command.characterId) && !string.IsNullOrWhiteSpace(command.face))
+                    var characterIds = command.GetCharacterIds();
+                    var faces = command.GetFaces();
+                    if (characterIds.Length > 0 && faces.Length > 0)
                     {
-                        var key = $"char:{command.characterId.Trim()}:{command.face.Trim()}";
-                        if (dedupe.Add(key))
+                        for (var i = 0; i < characterIds.Length; i++)
                         {
-                            var characterId = command.characterId;
-                            var face = command.face;
+                            var characterId = characterIds[i];
+                            var face = i < faces.Length ? faces[i] : faces[faces.Length - 1];
+                            var key = $"char:{characterId}:{face}";
+                            if (!dedupe.Add(key))
+                            {
+                                continue;
+                            }
+
                             tasks.Add(() => PreloadSpriteCoroutine(() => LoadCharacterSprite(characterId, face)));
                         }
                     }

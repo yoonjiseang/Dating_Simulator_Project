@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace VN.Data
 {
@@ -51,6 +52,42 @@ namespace VN.Data
         public string GetEffectKey()
         {
             return string.IsNullOrWhiteSpace(sort) ? transition : sort;
+        }
+        
+        public string[] GetCharacterIds()
+        {
+            return SplitMultiValue(characterId);
+        }
+
+        public string[] GetSlots()
+        {
+            return SplitMultiValue(slot);
+        }
+
+        public string[] GetFaces()
+        {
+            return SplitMultiValue(face);
+        }
+
+        public static string[] SplitMultiValue(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return Array.Empty<string>();
+            }
+
+            var chunks = value.Split(new[] { ',', '|', ';' }, StringSplitOptions.RemoveEmptyEntries);
+            var results = new List<string>(chunks.Length);
+            foreach (var chunk in chunks)
+            {
+                var trimmed = chunk.Trim();
+                if (!string.IsNullOrWhiteSpace(trimmed))
+                {
+                    results.Add(trimmed);
+                }
+            }
+
+            return results.ToArray();
         }
     }
 }
