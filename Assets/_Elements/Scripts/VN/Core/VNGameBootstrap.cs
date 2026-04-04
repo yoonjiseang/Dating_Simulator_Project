@@ -24,35 +24,57 @@ namespace VN.Core
 
         private void Awake()
         {
-            var viewStoryTopInstance = InstantiatePrefab(viewStoryTopPrefabPath, viewStoryTopParent);
-            var vnGameControllerInstance = InstantiatePrefab(vnGameControllerPrefabPath, vnGameControllerParent);
-
-            if (viewStoryTopInstance == null || vnGameControllerInstance == null)
-            {
-                Debug.LogError("[VNGameBootstrap] Required prefab instance is missing. Boot aborted.");
-                return;
-            }
-
-            var controller = vnGameControllerInstance.GetComponent<VNGameController>();
+            var controller = VNGameController.Instance;
             if (controller == null)
             {
-                controller = vnGameControllerInstance.GetComponentInChildren<VNGameController>(true);
+                var existingController = FindFirstObjectByType<VNGameController>(FindObjectsInactive.Include);
+                if (existingController != null)
+                {
+                    controller = existingController;
+                }
             }
 
             if (controller == null)
             {
-                Debug.LogError("[VNGameBootstrap] VNGameController component not found on instantiated VNGameController prefab.");
+                var vnGameControllerInstance = InstantiatePrefab(vnGameControllerPrefabPath, vnGameControllerParent);
+                if (vnGameControllerInstance != null)
+                {
+                    controller = vnGameControllerInstance.GetComponent<VNGameController>()
+                                 ?? vnGameControllerInstance.GetComponentInChildren<VNGameController>(true);
+                }
+            }
+
+            if (controller == null)
+            {
+                Debug.LogError("[VNGameBootstrap] VNGameController component not found. Boot aborted.");
                 return;
             }
 
-            var characterStage = viewStoryTopInstance.GetComponentInChildren<CharacterStageController>(true);
-            var dialogue = viewStoryTopInstance.GetComponentInChildren<DialogueUIController>(true);
-            var choice = viewStoryTopInstance.GetComponentInChildren<ChoiceUIController>(true);
+            var characterStage = FindFirstObjectByType<CharacterStageController>(FindObjectsInactive.Include);
+            var dialogue = FindFirstObjectByType<DialogueUIController>(FindObjectsInactive.Include);
+            var choice = FindFirstObjectByType<ChoiceUIController>(FindObjectsInactive.Include);
+
+            if (characterStage == null || dialogue == null || choice == null)
+            {
+                var viewStoryTopInstance = InstantiatePrefab(viewStoryTopPrefabPath, viewStoryTopParent);
+                if (viewStoryTopInstance == null)
+                {
+                    Debug.LogError("[VNGameBootstrap] ViewStoryTop prefab could not be instantiated. Boot aborted.");
+                    return;
+                }
+
+                characterStage = viewStoryTopInstance.GetComponentInChildren<CharacterStageController>(true);
+                dialogue = viewStoryTopInstance.GetComponentInChildren<DialogueUIController>(true);
+                choice = viewStoryTopInstance.GetComponentInChildren<ChoiceUIController>(true);
+            }
 
             var background = controller.GetComponentInChildren<BackgroundController>(true);
             var audio = controller.GetComponentInChildren<AudioController>(true);
-            var input = FindFirstObjectByType<VNInputRouter>();
-            var loadingUi = viewStoryTopInstance.GetComponentInChildren<LoadingUIController>(true);
+            background ??= FindFirstObjectByType<BackgroundController>(FindObjectsInactive.Include);
+            audio ??= FindFirstObjectByType<AudioController>(FindObjectsInactive.Include);
+
+            var input = VNInputRouter.Instance ?? FindFirstObjectByType<VNInputRouter>(FindObjectsInactive.Include);
+            var loadingUi = FindFirstObjectByType<LoadingUIController>(FindObjectsInactive.Include);
 
             controller.ConfigureDependencies(
                 characterStage,

@@ -6,7 +6,37 @@ namespace VN.Systems
 {
     public class VNInputRouter : MonoBehaviour
     {
+        public static VNInputRouter Instance { get; private set; }
+
+        [SerializeField] private bool dontDestroyOnLoad = true;
         public event Action OnNextPressed;
+
+        private void Awake()
+        {
+            var rootObject = transform.root.gameObject;
+
+            if (Instance != null && Instance != this)
+            {
+                Debug.LogWarning("[VNInputRouter] Duplicate instance detected. Destroying the new one.");
+                Destroy(rootObject);
+                return;
+            }
+
+            Instance = this;
+
+            if (dontDestroyOnLoad)
+            {
+                DontDestroyOnLoad(rootObject);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+        }
 
         private void Update()
         {

@@ -8,9 +8,12 @@ namespace VN.Core
 {
     public class VNGameController : MonoBehaviour
     {
+        public static VNGameController Instance { get; private set; }
+
         [Header("Story")]
         [SerializeField] private string storyId = "storydata_0000001";
         [SerializeField] private bool autoStartOnAwake = true;
+        [SerializeField] private bool dontDestroyOnLoad = true;
 
         [Header("Controllers")]
         [SerializeField] private CharacterStageController characterStageController;
@@ -29,6 +32,33 @@ namespace VN.Core
         private VariableStore _variableStore;
         private CommandProcessor _processor;
         private SaveLoadManager _saveLoadManager;
+
+        private void Awake()
+        {
+            var rootObject = transform.root.gameObject;
+
+            if (Instance != null && Instance != this)
+            {
+                Debug.LogWarning("[VNGameController] Duplicate instance detected. Destroying the new one.");
+                Destroy(rootObject);
+                return;
+            }
+
+            Instance = this;
+
+            if (dontDestroyOnLoad)
+            {
+                DontDestroyOnLoad(rootObject);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+        }
 
         private IEnumerator Start()
         {
