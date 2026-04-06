@@ -197,13 +197,6 @@ MonoBehaviour:
     - character
     - vn
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8c2f0958056ad24439fd301cc962d83a
-    m_Address: VN/BGM/bgm_100003
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - bgm
-    - vn
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8ccce8396b08ab14585c174b20742c24
     m_Address: VN/Backgrounds/bg_100302
     m_ReadOnly: 0

@@ -41,6 +41,8 @@ namespace VN.Editor
 
         public static void BuildAddressablesForCi()
         {
+            VNMasterDataBuildPipeline.BuildForCi();
+
             var report = SyncCatalogAndAddressables();
             if (report.MissingCatalogEntries.Count > 0)
             {
@@ -64,6 +66,8 @@ namespace VN.Editor
 
         public static void ValidateAddressablesForCi()
         {
+            VNMasterDataBuildPipeline.ValidateForCi();
+            
             var report = SyncCatalogAndAddressables();
             if (report.MissingCatalogEntries.Count > 0)
             {

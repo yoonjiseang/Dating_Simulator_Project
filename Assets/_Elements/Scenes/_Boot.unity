@@ -578,8 +578,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b59f504501086b448924772adbcebfb8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VN.Core.VNGameBootstrap
-  viewStoryTopPrefabPath: VN/ViewStoryTop
-  vnGameControllerPrefabPath: VN/VNGameController
+  viewStoryTopPrefabAddress: VN/ViewStoryTop
+  vnGameControllerPrefabAddress: VN/VNGameController
   viewStoryTopParent: {fileID: 507111537}
   vnGameControllerParent: {fileID: 632398138}
   overrideStoryId: storydata_0000001
