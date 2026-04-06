@@ -35,9 +35,9 @@ namespace VN.Editor
         private VNResourceCatalog _catalog;
         [SerializeField] private string _catalogPath = DefaultCatalogPath;
 
-        [SerializeField] private string _storyId = "story_001";
+        [SerializeField] private string _storyId = "storydata_0000001";
         [SerializeField] private string _startNode = "node_001";
-        [SerializeField] private string _savePath = StoriesRoot + "/story_001.json";
+        [SerializeField] private string _savePath = StoriesRoot + "/storydata_0000001.json";
 
         [SerializeField] private List<NodeDraft> _nodes = new();
         private Vector2 _scroll;

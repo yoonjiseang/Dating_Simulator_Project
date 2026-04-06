@@ -1,0 +1,338 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: VNContent
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: VNContent
+  m_GUID: 378792e1a66ed70438fe47ad0cd48b53
+  m_SerializeEntries:
+  - m_GUID: 008769176e019fe419f1769b3ede1290
+    m_Address: VN/Backgrounds/bg_100402
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 06fe63d0d2b85f0448bf575abb5c7100
+    m_Address: VN/Backgrounds/bg_100701
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0ff6202bdfcab354da2fbbaa52af134e
+    m_Address: VN/Backgrounds/bg_100502
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 15b2a17a8975234458993680d8eebb76
+    m_Address: VN/Characters/1001/1001_01
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - character
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 19941fb7260b4e34a8eca7b8b5bd9521
+    m_Address: VN/SFX/perfect-fart
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - sfx
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1afa1b02eae69a5479ceb3c5239e14b4
+    m_Address: VN/BGM/bgm_100001
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - bgm
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 23009939e5055e544849babadd09cc08
+    m_Address: VN/Backgrounds/bg_100202
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 26602523c89821c429e3d89d224d8fdf
+    m_Address: VN/Characters/0018/0018_01
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - character
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2ddecf33e60b03f4e993505ed777aaa4
+    m_Address: VN/Characters/1004/1004_01
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - character
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3d778296b5a884c409a2638279f91e45
+    m_Address: VN/BGM/bgm_100002
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - bgm
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 48d98882039a9f2419c9ea34a475de46
+    m_Address: VN/Backgrounds/bg_100702
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4b0e70f1dc898d94fa2709f51736c9e6
+    m_Address: VN/Backgrounds/bg_100803
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4cc9aed160cd40245abba7d077953efe
+    m_Address: VN/Backgrounds/bg_100501
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 55e594d28c387bd4bb6cd6093766e4de
+    m_Address: VN/Characters/0017/0017_01
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - character
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5a07bfa82b1ad2a44a6e0480fa945959
+    m_Address: VN/Backgrounds/bg_100201
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5ccbe5489e1c28a4bb4be7e932d7e6a6
+    m_Address: VN/Characters/1002/1002_01
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - character
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 615f4049ebd41874a9d80c7712b371d6
+    m_Address: VN/Characters/0021/0021_01
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - character
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 65174dcba3c20d24bb354da762349ea5
+    m_Address: VN/Backgrounds/bg_100303
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 67c595eb5a518d64f93adfef79c2dcad
+    m_Address: VN/Characters/0020/0020_01
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - character
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 68db307e88ad5344eb03f7ef09eaaf7e
+    m_Address: VN/Backgrounds/bg_100802
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6f213a6edf734b14c945c0a53ebcf17a
+    m_Address: VN/VNResourceCatalog
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - character
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 72616c8d6c5e2504596ffd92dce2526b
+    m_Address: VN/Characters/0016/0016_01
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - character
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 77f8233bc0a81fb4780e66581629fcb6
+    m_Address: VN/Characters/1003/1003_01
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - character
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7f3458a1c5432874295db51f986d7dfa
+    m_Address: VN/Backgrounds/bg_100503
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 850517aa4dbf5704c84b8edb6e7f5cf3
+    m_Address: VN/Backgrounds/bg_100602
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 891295084a551d34098056c2869c87f3
+    m_Address: VN/Characters/1005/1005_01
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - character
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8c2f0958056ad24439fd301cc962d83a
+    m_Address: VN/BGM/bgm_100003
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - bgm
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8ccce8396b08ab14585c174b20742c24
+    m_Address: VN/Backgrounds/bg_100302
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8ec4c716bad65614bb49124e34bd3353
+    m_Address: VN/Backgrounds/bg_100401
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8f67b1220cb9be44fa2e4be0fa570986
+    m_Address: VN/Characters/0019/0019_01
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - character
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 957cb4c468d4533438e1ac64e189c4d2
+    m_Address: VN/SFX/button-click
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - sfx
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 99c990bd8cc94154092ae03a142bb07b
+    m_Address: VN/ViewStoryTop
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - bootstrap
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a230b329da8383e4d876274cf95ec88a
+    m_Address: VN/Backgrounds/bg_100204
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a88151859271fde47ac6a0e884d4b24e
+    m_Address: VN/Backgrounds/bg_100102
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a9c74e9e88a13f447beab67c375164a8
+    m_Address: VN/VNGameController
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - bootstrap
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a9eac7ce223649746b10cad4b2e9698d
+    m_Address: VN/Backgrounds/bg_100101
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b056aa7cb99103d43bb4fa958b968eef
+    m_Address: VN/Backgrounds/bg_100103
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b19b20e58d2ed81419de4b9abc068009
+    m_Address: VN/Backgrounds/bg_100703
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bdc8aafad85502a40898454b0bb170bc
+    m_Address: VN/Characters/1000/1000_01
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - character
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: be988aed69dfc514a9b50e5fbea05c0c
+    m_Address: VN/Backgrounds/bg_100601
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c7f0d940df21591458a8eb12713e3abb
+    m_Address: VN/Backgrounds/bg_100801
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d6598916a8b499849a51a370e5f60eb8
+    m_Address: VN/Backgrounds/bg_100001
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: da147ea4e547d3747b3c4f19ddce3d23
+    m_Address: VN/Backgrounds/bg_100203
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eacf71c4ab99f1f4f878b6c9c5bb3ecb
+    m_Address: VN/Backgrounds/bg_100301
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ee3aa9e494ba79c4e8d30b7344df7d01
+    m_Address: VN/Characters/1000/1000_02
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - character
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 01f469728a0aefd45bc4a74688005875, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 37ece2588e139a049b346b7cfa7280d2, type: 2}
+    - {fileID: 11400000, guid: 2ba8ac1f84591654e844eafef94f830c, type: 2}
