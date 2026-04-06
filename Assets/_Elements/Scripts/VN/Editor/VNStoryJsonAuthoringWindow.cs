@@ -40,7 +40,11 @@ namespace VN.Editor
         [SerializeField] private string _savePath = StoriesRoot + "/storydata_0000001.json";
 
         [SerializeField] private List<NodeDraft> _nodes = new();
+        [SerializeField] private List<string> _collapsedCommandKeys = new();
         private Vector2 _scroll;
+        private GUIStyle _titleStyle;
+        private GUIStyle _sectionHeaderStyle;
+        private GUIStyle _hintLabelStyle;
 
         [MenuItem("Tools/VN/Story JSON Authoring")]
         public static void OpenWindow()
@@ -52,6 +56,8 @@ namespace VN.Editor
 
         private void OnEnable()
         {
+            InitializeStyles();
+
             if (_nodes == null || _nodes.Count == 0)
             {
                 _nodes = new List<NodeDraft>
@@ -61,6 +67,24 @@ namespace VN.Editor
             }
 
             TryLoadCatalogFromPath();
+        }
+
+        private void InitializeStyles()
+        {
+            _titleStyle = new GUIStyle(EditorStyles.boldLabel)
+            {
+                fontSize = 16
+            };
+
+            _sectionHeaderStyle = new GUIStyle(EditorStyles.boldLabel)
+            {
+                fontSize = 12
+            };
+
+            _hintLabelStyle = new GUIStyle(EditorStyles.miniLabel)
+            {
+                wordWrap = true
+            };
         }
 
         private void OnGUI()
@@ -74,8 +98,14 @@ namespace VN.Editor
 
         private void DrawHeader()
         {
-            EditorGUILayout.LabelField("VN Story JSON Authoring Tool", EditorStyles.boldLabel);
-            EditorGUILayout.HelpBox("스토리 노드/커맨드를 시각적으로 작성하고 JSON으로 저장합니다.\n리소스 ID 자동완성은 VNResourceCatalog.asset를 사용합니다.", MessageType.Info);
+            EditorGUILayout.LabelField("VN Story JSON Authoring Tool", _titleStyle);
+            EditorGUILayout.HelpBox(
+                "초보자 빠른 시작\n" +
+                "1) Story ID / Start Node를 먼저 입력\n" +
+                "2) + Add Node → + Add Command 순서로 작성\n" +
+                "3) 자동완성 버튼(파란 버튼)을 적극 활용\n" +
+                "4) 마지막에 Save JSON으로 저장",
+                MessageType.Info);
 
             using (new EditorGUILayout.HorizontalScope())
             {
@@ -87,16 +117,29 @@ namespace VN.Editor
             }
 
             _catalogPath = EditorGUILayout.TextField("Catalog Path", _catalogPath);
+            EditorGUILayout.LabelField("Catalog Path가 맞으면 Character/BG/BGM 자동완성이 동작합니다.", _hintLabelStyle);
         }
 
         private void DrawStoryInfo()
         {
             using (new EditorGUILayout.VerticalScope("box"))
             {
-                EditorGUILayout.LabelField("Story", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField("Story 기본 설정", _sectionHeaderStyle);
                 _storyId = EditorGUILayout.TextField("Story ID", _storyId);
                 _startNode = EditorGUILayout.TextField("Start Node", _startNode);
-                _savePath = EditorGUILayout.TextField("Save JSON Path", _savePath);
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    _savePath = EditorGUILayout.TextField("Save JSON Path", _savePath);
+                    if (GUILayout.Button("Browse", GUILayout.Width(80f)))
+                    {
+                        var selectedPath = EditorUtility.SaveFilePanelInProject("Save Story JSON", Path.GetFileNameWithoutExtension(_savePath), "json", "저장할 JSON 파일을 선택하세요.");
+                        if (!string.IsNullOrWhiteSpace(selectedPath))
+                        {
+                            _savePath = selectedPath;
+                        }
+                    }
+                }
+                EditorGUILayout.LabelField("권장: Assets/_ElementsResources/VN/Stories 폴더에 저장", _hintLabelStyle);
 
                 using (new EditorGUILayout.HorizontalScope())
                 {
@@ -117,7 +160,9 @@ namespace VN.Editor
         {
             using (new EditorGUILayout.VerticalScope("box"))
             {
-                EditorGUILayout.LabelField("Nodes", EditorStyles.boldLabel);
+                var totalCommands = _nodes.Sum(n => n.commands?.Count ?? 0);
+                EditorGUILayout.LabelField("Nodes / Commands 편집", _sectionHeaderStyle);
+                EditorGUILayout.LabelField($"현재 노드 {_nodes.Count}개 / 커맨드 {totalCommands}개", _hintLabelStyle);
 
                 using (new EditorGUILayout.HorizontalScope())
                 {
@@ -148,12 +193,13 @@ namespace VN.Editor
         private void DrawSingleNode(int nodeIndex)
         {
             var node = _nodes[nodeIndex];
+            var commandCount = node.commands?.Count ?? 0;
 
             using (new EditorGUILayout.VerticalScope("box"))
             {
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    node.foldout = EditorGUILayout.Foldout(node.foldout, $"Node {nodeIndex + 1}: {node.id}", true);
+                    node.foldout = EditorGUILayout.Foldout(node.foldout, $"Node {nodeIndex + 1}: {node.id}  ({commandCount} commands)", true);
                     if (GUILayout.Button("Duplicate", GUILayout.Width(90f)))
                     {
                         _nodes.Insert(nodeIndex + 1, CloneNode(node));
@@ -171,7 +217,7 @@ namespace VN.Editor
                     return;
                 }
 
-                node.id = EditorGUILayout.TextField("Node ID", node.id);
+                EditorGUILayout.LabelField("노드 ID 예시: node_010, prologue_intro", _hintLabelStyle);
 
                 using (new EditorGUILayout.HorizontalScope())
                 {
@@ -191,34 +237,154 @@ namespace VN.Editor
         private void DrawCommand(NodeDraft node, int nodeIndex, int commandIndex)
         {
             var command = node.commands[commandIndex];
+            var prevBgColor = GUI.backgroundColor;
+            GUI.backgroundColor = GetCommandColor(command.type);
+            var expanded = IsCommandExpanded(node, nodeIndex, commandIndex);
 
             using (new EditorGUILayout.VerticalScope("box"))
             {
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    EditorGUILayout.LabelField($"Command {commandIndex + 1}", EditorStyles.boldLabel);
+                    var nextExpanded = EditorGUILayout.Foldout(expanded, $"Command {commandIndex + 1} · {command.type}", true);
+                    if (nextExpanded != expanded)
+                    {
+                        SetCommandExpanded(node, nodeIndex, commandIndex, nextExpanded);
+                        expanded = nextExpanded;
+                    }
                     if (GUILayout.Button("▲", GUILayout.Width(28f)) && commandIndex > 0)
                     {
                         (node.commands[commandIndex - 1], node.commands[commandIndex]) = (node.commands[commandIndex], node.commands[commandIndex - 1]);
+                        GUI.backgroundColor = prevBgColor;
                         return;
                     }
                     if (GUILayout.Button("▼", GUILayout.Width(28f)) && commandIndex < node.commands.Count - 1)
                     {
                         (node.commands[commandIndex + 1], node.commands[commandIndex]) = (node.commands[commandIndex], node.commands[commandIndex + 1]);
+                        GUI.backgroundColor = prevBgColor;
                         return;
                     }
                     if (GUILayout.Button("Delete", GUILayout.Width(70f)))
                     {
                         node.commands.RemoveAt(commandIndex);
+                        GUI.backgroundColor = prevBgColor;
                         return;
                     }
                 }
 
+                if (!expanded)
+                {
+                    GUI.backgroundColor = prevBgColor;
+                    return;
+                }
+
                 var typeIndex = Mathf.Max(0, Array.IndexOf(CommandTypes, command.type ?? string.Empty));
                 var newTypeIndex = EditorGUILayout.Popup("Type", typeIndex, CommandTypes);
-                command.type = CommandTypes[newTypeIndex];
+                var newType = CommandTypes[newTypeIndex];
+                if (!string.Equals(command.type, newType, StringComparison.Ordinal))
+                {
+                    command.type = newType;
+                    ApplyCommandDefaults(command);
+                }
+
+                DrawCommandGuide(command.type);
 
                 DrawCommandFields(nodeIndex, commandIndex, command);
+            }
+            
+            GUI.backgroundColor = prevBgColor;
+        }
+
+        private bool IsCommandExpanded(NodeDraft node, int nodeIndex, int commandIndex)
+        {
+            var key = GetCommandFoldoutKey(node, nodeIndex, commandIndex);
+            return !_collapsedCommandKeys.Contains(key);
+        }
+
+        private void SetCommandExpanded(NodeDraft node, int nodeIndex, int commandIndex, bool expanded)
+        {
+            var key = GetCommandFoldoutKey(node, nodeIndex, commandIndex);
+            if (expanded)
+            {
+                _collapsedCommandKeys.RemoveAll(k => string.Equals(k, key, StringComparison.Ordinal));
+                return;
+            }
+
+            if (!_collapsedCommandKeys.Contains(key))
+            {
+                _collapsedCommandKeys.Add(key);
+            }
+        }
+
+        private static string GetCommandFoldoutKey(NodeDraft node, int nodeIndex, int commandIndex)
+        {
+            var nodeId = string.IsNullOrWhiteSpace(node?.id) ? "node" : node.id.Trim();
+            return $"{nodeIndex}:{nodeId}:{commandIndex}";
+        }
+
+        private static Color GetCommandColor(string commandType)
+        {
+            return commandType switch
+            {
+                "dialogue" => new Color(0.88f, 0.95f, 1f),
+                "choice" => new Color(1f, 0.95f, 0.86f),
+                "if" => new Color(0.94f, 0.89f, 1f),
+                "setVariable" => new Color(0.9f, 1f, 0.9f),
+                "jump" => new Color(1f, 0.92f, 0.92f),
+                _ => new Color(0.95f, 0.95f, 0.95f)
+            };
+        }
+
+        private static void DrawCommandGuide(string commandType)
+        {
+            var message = commandType switch
+            {
+                "dialogue" => "대사 1줄을 출력합니다. Speaker / Text를 우선 입력하세요.",
+                "background" => "배경 이미지를 전환합니다. Background Key를 자동완성으로 선택하세요.",
+                "showCharacter" => "캐릭터를 화면에 표시합니다. Character ID, Slot을 설정하세요.",
+                "hideCharacter" => "캐릭터를 화면에서 숨깁니다.",
+                "changeFace" => "같은 캐릭터의 표정만 변경합니다.",
+                "moveCharacter" => "캐릭터 슬롯(left/center/right) 이동에 사용합니다.",
+                "choice" => "선택지를 추가합니다. 각 옵션은 Jump 노드 지정이 중요합니다.",
+                "jump" => "지정한 노드로 즉시 이동합니다.",
+                "if" => "조건 분기를 실행합니다. Then / Else 노드를 모두 지정하세요.",
+                "setVariable" => "변수 값을 설정/증감합니다. Name, Op, Value를 확인하세요.",
+                "end" => "스토리를 종료합니다.",
+                _ => "필수 파라미터를 확인하여 작성하세요."
+            };
+
+            EditorGUILayout.HelpBox(message, MessageType.None);
+        }
+
+        private static void ApplyCommandDefaults(CommandData command)
+        {
+            if (command == null)
+            {
+                return;
+            }
+
+            switch (command.type)
+            {
+                case "dialogue":
+                    command.duration = 0.2f;
+                    break;
+                case "background":
+                    command.duration = 0.2f;
+                    break;
+                case "showCharacter":
+                case "hideCharacter":
+                case "changeFace":
+                case "moveCharacter":
+                    command.duration = 0.2f;
+                    break;
+                case "wait":
+                    if (command.waitDuration <= 0f)
+                    {
+                        command.waitDuration = 1f;
+                    }
+                    break;
+                case "setVariable":
+                    command.op = string.IsNullOrWhiteSpace(command.op) ? "set" : command.op;
+                    break;
             }
         }
 
