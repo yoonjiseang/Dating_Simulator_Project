@@ -164,7 +164,7 @@ namespace VN.Core
                 return;
             }
 
-            _saveLoadManager.Load(slot, _runtime, _variableStore, backgroundController, characterStageController);
+            StartCoroutine(_saveLoadManager.Load(slot, _runtime, _variableStore, backgroundController, characterStageController, _resourceProvider));
         }
 
         private void ResolveOptionalDependencies()

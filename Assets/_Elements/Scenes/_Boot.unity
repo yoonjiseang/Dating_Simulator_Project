@@ -582,7 +582,7 @@ MonoBehaviour:
   vnGameControllerPrefabAddress: VN/VNGameController
   viewStoryTopParent: {fileID: 507111537}
   vnGameControllerParent: {fileID: 632398138}
-  overrideStoryId: storydata_0000001
+  overrideStoryId: storydata_0000002
 --- !u!4 &2094670768
 Transform:
   m_ObjectHideFlags: 0

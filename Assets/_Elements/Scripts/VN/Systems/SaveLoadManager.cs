@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using VN.Controllers;
 using VN.Core;
@@ -76,32 +78,38 @@ namespace VN.Systems
             PlayerPrefs.Save();
         }
 
-        public void Load(string slot, StoryRuntime runtime, VariableStore variableStore, BackgroundController bg, CharacterStageController stage)
+        public IEnumerator Load(
+            string slot,
+            StoryRuntime runtime,
+            VariableStore variableStore,
+            BackgroundController bg,
+            CharacterStageController stage,
+            ResourceProvider resourceProvider)
         {
             if (string.IsNullOrWhiteSpace(slot))
             {
                 Debug.LogError("[SaveLoadManager] Load slot is empty.");
-                return;
+                yield break;
             }
 
             if (runtime == null || variableStore == null)
             {
                 Debug.LogError("[SaveLoadManager] Load dependencies are missing.");
-                return;
+                yield break;
             }
 
             var json = PlayerPrefs.GetString(GetKey(slot), string.Empty);
             if (string.IsNullOrWhiteSpace(json))
             {
                 Debug.LogWarning($"[SaveLoadManager] Save slot not found: {slot}");
-                return;
+                yield break;
             }
 
             var data = JsonUtility.FromJson<SaveData>(json);
             if (data == null)
             {
                 Debug.LogError("[SaveLoadManager] Failed to parse save data.");
-                return;
+                yield break;
             }
 
             var dict = new Dictionary<string, int>();
@@ -133,9 +141,108 @@ namespace VN.Systems
                 Debug.LogWarning("[SaveLoadManager] Character view data exists but CharacterStageController is not available.");
             }
 
-            Debug.Log("[SaveLoadManager] Runtime state loaded. Visual restore is not implemented in the default save flow.");
+            if (resourceProvider == null)
+            {
+                Debug.LogWarning("[SaveLoadManager] ResourceProvider is missing. Visual restore will be skipped.");
+                yield break;
+            }
+
+            yield return RestoreBackground(data, bg, resourceProvider);
+            yield return RestoreCharacters(data, stage, resourceProvider);
+
+            Debug.Log("[SaveLoadManager] Runtime + visual state restored from save data.");
         }
 
         private static string GetKey(string slot) => $"VN_SAVE_{slot}";
+
+        private static IEnumerator RestoreBackground(SaveData data, BackgroundController bg, ResourceProvider resourceProvider)
+        {
+            if (data == null || bg == null || resourceProvider == null || string.IsNullOrWhiteSpace(data.backgroundKey))
+            {
+                yield break;
+            }
+
+            var sprite = resourceProvider.LoadBackground(data.backgroundKey);
+            if (sprite == null)
+            {
+                Debug.LogWarning($"[SaveLoadManager] Failed to restore background sprite: {data.backgroundKey}");
+                yield break;
+            }
+
+            yield return bg.SetBackground(sprite, data.backgroundKey, string.Empty, 0f);
+        }
+
+        private static IEnumerator RestoreCharacters(SaveData data, CharacterStageController stage, ResourceProvider resourceProvider)
+        {
+            if (data == null || stage == null || resourceProvider == null)
+            {
+                yield break;
+            }
+
+            var activeIds = stage.ActiveViews?.Select(v => v.characterId).Where(id => !string.IsNullOrWhiteSpace(id)).ToArray();
+            if (activeIds != null)
+            {
+                for (var i = 0; i < activeIds.Length; i++)
+                {
+                    yield return stage.HideCharacter(activeIds[i], 0f, string.Empty);
+                }
+            }
+
+            if (data.characters == null || data.characters.Count == 0)
+            {
+                yield break;
+            }
+
+            foreach (var character in data.characters)
+            {
+                if (character == null || string.IsNullOrWhiteSpace(character.characterId))
+                {
+                    continue;
+                }
+
+                var sprite = ResolveCharacterSprite(resourceProvider, character);
+                if (sprite == null)
+                {
+                    Debug.LogWarning($"[SaveLoadManager] Failed to restore character sprite. characterId={character.characterId}, bodyKey={character.bodyKey}, faceKey={character.faceKey}");
+                    continue;
+                }
+
+                yield return stage.ShowCharacter(character.characterId, character.slot, sprite, null, 0f, string.Empty);
+            }
+        }
+
+        private static Sprite ResolveCharacterSprite(ResourceProvider resourceProvider, CharacterState character)
+        {
+            if (resourceProvider == null || character == null || string.IsNullOrWhiteSpace(character.characterId))
+            {
+                return null;
+            }
+
+            if (!string.IsNullOrWhiteSpace(character.faceKey))
+            {
+                var faceSprite = resourceProvider.LoadCharacterSprite(character.characterId, character.faceKey);
+                if (faceSprite != null)
+                {
+                    return faceSprite;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(character.bodyKey))
+            {
+                var bodyKey = character.bodyKey.Trim();
+                var separatorIndex = bodyKey.LastIndexOf('_');
+                if (separatorIndex >= 0 && separatorIndex < bodyKey.Length - 1)
+                {
+                    var faceCandidate = bodyKey[(separatorIndex + 1)..];
+                    var spriteByParsedFace = resourceProvider.LoadCharacterSprite(character.characterId, faceCandidate);
+                    if (spriteByParsedFace != null)
+                    {
+                        return spriteByParsedFace;
+                    }
+                }
+            }
+
+            return null;
+        }
     }
 }
