@@ -96,6 +96,24 @@ namespace VN.Core
             _skipAdvanceOnce = true;
         }
 
+        public bool TryRestoreCommandIndex(int commandIndex)
+        {
+            if (IsEnded || CurrentNode?.commands == null)
+            {
+                return false;
+            }
+
+            if (commandIndex < 0 || commandIndex >= CurrentNode.commands.Length)
+            {
+                Debug.LogError($"[StoryRuntime] Invalid command index restore request: {commandIndex}");
+                return false;
+            }
+
+            CommandIndex = commandIndex;
+            _skipAdvanceOnce = false;
+            return true;
+        }
+
         public void End()
         {
             IsEnded = true;

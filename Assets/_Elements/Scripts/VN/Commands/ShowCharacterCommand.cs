@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using VN.Core;
 
@@ -21,13 +22,22 @@ namespace VN.Commands
             var faces = d.GetFaces();
             var effect = d.GetEffectKey();
             var routines = new List<IEnumerator>(characterIds.Length);
+            var spriteTasks = new Task<Sprite>[characterIds.Length];
+
+            for (var i = 0; i < characterIds.Length; i++)
+            {
+                var face = ResolveValueByIndex(faces, i, d.face);
+                spriteTasks[i] = context.ResourceProvider.LoadCharacterSpriteAsync(characterIds[i], face);
+            }
+
+            yield return ResourceProvider.WaitForTask(Task.WhenAll(spriteTasks));
 
             for (var i = 0; i < characterIds.Length; i++)
             {
                 var characterId = characterIds[i];
                 var slot = ResolveValueByIndex(slots, i, d.slot);
                 var face = ResolveValueByIndex(faces, i, d.face);
-                var sprite = context.ResourceProvider.LoadCharacterSprite(characterId, face);
+                var sprite = spriteTasks[i].Status == TaskStatus.RanToCompletion ? spriteTasks[i].Result : null;
 
                 if (sprite == null)
                 {

@@ -125,10 +125,9 @@ namespace VN.Systems
             variableStore.Import(dict);
 
             runtime.JumpToNode(data.nodeId);
-            // 명시적으로 인덱스를 맞춰서 저장 지점 복원
-            for (var i = 0; i < data.commandIndex && !runtime.IsEnded; i++)
+            if (!runtime.IsEnded && !runtime.TryRestoreCommandIndex(data.commandIndex))
             {
-                runtime.AdvanceCommand();
+                Debug.LogWarning($"[SaveLoadManager] Invalid command index in save data: {data.commandIndex}. Fallback to node start.");
             }
 
             if (!string.IsNullOrWhiteSpace(data.backgroundKey) && bg == null)

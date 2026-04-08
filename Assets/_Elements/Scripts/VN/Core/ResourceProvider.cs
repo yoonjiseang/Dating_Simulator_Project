@@ -26,6 +26,11 @@ namespace VN.Core
         public Sprite LoadCharacterBody(string characterId, string bodyKey) => LoadBlocking<Sprite>($"Characters/{characterId}/{characterId}_{bodyKey}");
         public Sprite LoadCharacterFace(string characterId, string faceKey) => LoadBlocking<Sprite>($"Characters/{characterId}/face_{faceKey}");
 
+        public Task<Sprite> LoadBackgroundAsync(string bgKey) => LoadAssetAsync<Sprite>($"Backgrounds/{bgKey}");
+        public Task<AudioClip> LoadBgmAsync(string bgmKey) => LoadAssetAsync<AudioClip>($"BGM/{bgmKey}");
+        public Task<AudioClip> LoadSfxAsync(string sfxKey) => LoadAssetAsync<AudioClip>($"SFX/{sfxKey}");
+        public Task<AudioClip> LoadVoiceAsync(string characterId, string voiceKey) => LoadAssetAsync<AudioClip>($"Characters/{characterId}/voice/{voiceKey}");
+
         public Sprite LoadCharacterSprite(string characterId, string faceKey)
         {
             if (string.IsNullOrWhiteSpace(characterId) || string.IsNullOrWhiteSpace(faceKey))
@@ -68,8 +73,8 @@ namespace VN.Core
                     batch[i] = preloadTasks[offset + i]();
                 }
 
-                var allTask = Task.WhenAll(batch);
-                yield return WaitTask(allTask);
+            var allTask = Task.WhenAll(batch);
+            yield return WaitForTask(allTask);
 
                 completedCount += count;
                 onProgress?.Invoke((float)completedCount / preloadTasks.Count, $"Preloading {completedCount}/{preloadTasks.Count}");
@@ -152,7 +157,7 @@ namespace VN.Core
             }
         }
 
-        private async Task<Sprite> LoadCharacterSpriteAsync(string characterId, string faceKey)
+        public async Task<Sprite> LoadCharacterSpriteAsync(string characterId, string faceKey)
         {
             if (string.IsNullOrWhiteSpace(characterId) || string.IsNullOrWhiteSpace(faceKey))
             {
@@ -286,7 +291,7 @@ namespace VN.Core
             }
         }
 
-        private static IEnumerator WaitTask(Task task)
+        public static IEnumerator WaitForTask(Task task)
         {
             while (!task.IsCompleted)
             {
@@ -310,6 +315,21 @@ namespace VN.Core
         private static string NormalizeRelativeKey(string relativeKey)
         {
             return relativeKey.Trim().Replace('\\', '/');
+        }
+
+        public void ReleaseAll()
+        {
+            foreach (var handle in _handles.Values)
+            {
+                if (handle.IsValid())
+                {
+                    Addressables.Release(handle);
+                }
+            }
+
+            _handles.Clear();
+            _cache.Clear();
+            _loadingTasks.Clear();
         }
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using VN.Core;
 
@@ -16,7 +17,9 @@ namespace VN.Commands
                 yield break;
             }
 
-            var sprite = context.ResourceProvider.LoadBackground(d.bg);
+            Task<Sprite> loadTask = context.ResourceProvider.LoadBackgroundAsync(d.bg);
+            yield return ResourceProvider.WaitForTask(loadTask);
+            var sprite = loadTask.Status == TaskStatus.RanToCompletion ? loadTask.Result : null;
             if (sprite == null)
             {
                 Debug.LogWarning($"[BackgroundCommand] Background sprite not found for key='{d.bg}'. Skipping visual update.");

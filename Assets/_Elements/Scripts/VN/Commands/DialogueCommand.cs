@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using VN.Core;
 
@@ -58,7 +59,9 @@ namespace VN.Commands
                 }
                 else
                 {
-                    var voice = context.ResourceProvider.LoadVoice(d.characterId, d.voice);
+                    Task<AudioClip> loadTask = context.ResourceProvider.LoadVoiceAsync(d.characterId, d.voice);
+                    yield return ResourceProvider.WaitForTask(loadTask);
+                    var voice = loadTask.Status == TaskStatus.RanToCompletion ? loadTask.Result : null;
                     if (voice == null)
                     {
                         Debug.LogWarning($"[DialogueCommand] Voice clip not found. characterId={d.characterId}, voice={d.voice}");

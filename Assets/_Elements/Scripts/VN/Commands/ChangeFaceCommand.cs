@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using VN.Core;
 
@@ -9,7 +10,9 @@ namespace VN.Commands
         public IEnumerator Execute(CommandContext context)
         {
             var d = context.Data;
-            var sprite = context.ResourceProvider.LoadCharacterSprite(d.characterId, d.face);
+            Task<Sprite> loadTask = context.ResourceProvider.LoadCharacterSpriteAsync(d.characterId, d.face);
+            yield return ResourceProvider.WaitForTask(loadTask);
+            var sprite = loadTask.Status == TaskStatus.RanToCompletion ? loadTask.Result : null;
             if (sprite == null)
             {
                 Debug.LogError($"[ChangeFaceCommand] Failed to load character sprite. characterId={d.characterId}, face={d.face}");

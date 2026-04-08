@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using VN.Core;
 
@@ -32,7 +33,9 @@ namespace VN.Commands
                 yield break;
             }
 
-            var clip = context.ResourceProvider.LoadSfx(context.Data.sfx);
+            Task<AudioClip> loadTask = context.ResourceProvider.LoadSfxAsync(context.Data.sfx);
+            yield return ResourceProvider.WaitForTask(loadTask);
+            var clip = loadTask.Status == TaskStatus.RanToCompletion ? loadTask.Result : null;
             if (clip == null)
             {
                 Debug.LogWarning($"[PlaySfxCommand] SFX clip not found for key='{context.Data.sfx}'.");

@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using VN.Controllers;
 using VN.Systems;
 
@@ -191,9 +192,11 @@ namespace VN.Core
                 return null;
             }
 
+            AsyncOperationHandle<GameObject> handle = default;
             try
             {
-                var prefab = await Addressables.LoadAssetAsync<GameObject>(address).Task;
+                handle = Addressables.LoadAssetAsync<GameObject>(address);
+                var prefab = await handle.Task;
                 if (prefab == null)
                 {
                     Debug.LogError($"[VNGameBootstrap] Could not load prefab at Addressables key: {address}");
@@ -206,6 +209,13 @@ namespace VN.Core
             {
                 Debug.LogError($"[VNGameBootstrap] Failed to load addressable prefab ({address}).\n{ex}");
                 return null;
+            }
+            finally
+            {
+                if (handle.IsValid())
+                {
+                    Addressables.Release(handle);
+                }
             }
         }
     }

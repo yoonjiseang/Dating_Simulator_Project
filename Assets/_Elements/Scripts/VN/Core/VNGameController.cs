@@ -32,6 +32,7 @@ namespace VN.Core
         private VariableStore _variableStore;
         private CommandProcessor _processor;
         private SaveLoadManager _saveLoadManager;
+        private Coroutine _processorCoroutine;
 
         private void Awake()
         {
@@ -58,6 +59,13 @@ namespace VN.Core
             {
                 Instance = null;
             }
+
+            _resourceProvider?.ReleaseAll();
+            if (_processorCoroutine != null)
+            {
+                StopCoroutine(_processorCoroutine);
+                _processorCoroutine = null;
+            }
         }
 
         private IEnumerator Start()
@@ -82,6 +90,7 @@ namespace VN.Core
             SetLoadingVisible(true);
             UpdateLoadingProgress(0f);
 
+            _resourceProvider?.ReleaseAll();
             _storyLoader = new StoryLoader();
             _runtime = new StoryRuntime();
             _resourceProvider = new ResourceProvider();
@@ -116,7 +125,7 @@ namespace VN.Core
                 audioController);
 
             SetLoadingVisible(false);
-            yield return StartCoroutine(_processor.Run());
+            _processorCoroutine = StartCoroutine(_processor.Run());
         }
         
         public void ConfigureDependencies(
@@ -164,7 +173,52 @@ namespace VN.Core
                 return;
             }
 
-            StartCoroutine(_saveLoadManager.Load(slot, _runtime, _variableStore, backgroundController, characterStageController, _resourceProvider));
+            StartCoroutine(LoadAndResume(slot));
+        }
+
+        private IEnumerator LoadAndResume(string slot)
+        {
+            SetLoadingVisible(true);
+            UpdateLoadingProgress(0f);
+            inputRouter?.AcquireInputBlock();
+
+            try
+            {
+                if (_processorCoroutine != null)
+                {
+                    StopCoroutine(_processorCoroutine);
+                    _processorCoroutine = null;
+                }
+
+                yield return StartCoroutine(_saveLoadManager.Load(
+                    slot,
+                    _runtime,
+                    _variableStore,
+                    backgroundController,
+                    characterStageController,
+                    _resourceProvider));
+
+                if (!_runtime.IsEnded)
+                {
+                    _processor = new CommandProcessor(
+                        _runtime,
+                        _resourceProvider,
+                        _variableStore,
+                        characterStageController,
+                        backgroundController,
+                        dialogueUiController,
+                        choiceUiController,
+                        audioController);
+
+                    _processorCoroutine = StartCoroutine(_processor.Run());
+                }
+            }
+            finally
+            {
+                SetLoadingVisible(false);
+                UpdateLoadingProgress(1f);
+                inputRouter?.ReleaseInputBlock();
+            }
         }
 
         private void ResolveOptionalDependencies()

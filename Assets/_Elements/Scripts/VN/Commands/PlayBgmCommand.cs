@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using VN.Core;
 
@@ -14,7 +15,9 @@ namespace VN.Commands
                 yield break;
             }
 
-            var clip = context.ResourceProvider.LoadBgm(context.Data.bgm);
+            Task<AudioClip> loadTask = context.ResourceProvider.LoadBgmAsync(context.Data.bgm);
+            yield return ResourceProvider.WaitForTask(loadTask);
+            var clip = loadTask.Status == TaskStatus.RanToCompletion ? loadTask.Result : null;
             if (clip == null)
             {
                 Debug.LogWarning($"[PlayBgmCommand] BGM clip not found for key='{context.Data.bgm}'.");
