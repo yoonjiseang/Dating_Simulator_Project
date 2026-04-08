@@ -10,6 +10,11 @@ namespace VN.Systems
         public static VNInputRouter Instance { get; private set; }
 
         [SerializeField] private bool dontDestroyOnLoad = true;
+
+        [Header("Mouse Advance Area")]
+        [SerializeField] private bool restrictMouseAdvanceToArea = true;
+        [SerializeField] private RectTransform mouseAdvanceArea;
+
         public event Action OnNextPressed;
 
         private int _inputBlockCount;
@@ -56,6 +61,11 @@ namespace VN.Systems
             return _inputBlockCount > 0;
         }
 
+        public void SetMouseAdvanceArea(RectTransform area)
+        {
+            mouseAdvanceArea = area;
+        }
+
         private void Update()
         {
             if (IsInputBlocked())
@@ -66,10 +76,8 @@ namespace VN.Systems
             var mousePressed = Mouse.current?.leftButton.wasPressedThisFrame ?? false;
             var spacePressed = Keyboard.current?.spaceKey.wasPressedThisFrame ?? false;
 
-            var isPointerOverUi = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
-            if (mousePressed && isPointerOverUi)
+            if (mousePressed && !IsMouseAdvanceAllowed())
             {
-                // Ignore clicks consumed by UI (e.g. menu open button) so VN text does not advance.
                 mousePressed = false;
             }
 
@@ -77,6 +85,47 @@ namespace VN.Systems
             {
                 OnNextPressed?.Invoke();
             }
+        }
+
+        private bool IsMouseAdvanceAllowed()
+        {
+            if (Mouse.current == null)
+            {
+                return false;
+            }
+
+            if (restrictMouseAdvanceToArea)
+            {
+                if (mouseAdvanceArea == null)
+                {
+                    return false;
+                }
+
+                var screenPoint = Mouse.current.position.ReadValue();
+                var eventCamera = ResolveEventCamera(mouseAdvanceArea);
+                // If advance area is a UI RectTransform, pointer is naturally over UI.
+                // In that case, inside-area click should still be allowed.
+                return RectTransformUtility.RectangleContainsScreenPoint(mouseAdvanceArea, screenPoint, eventCamera);
+            }
+
+            var isPointerOverUi = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+            return !isPointerOverUi;
+        }
+
+        private static Camera ResolveEventCamera(RectTransform rectTransform)
+        {
+            var canvas = rectTransform.GetComponentInParent<Canvas>();
+            if (canvas == null)
+            {
+                return null;
+            }
+
+            if (canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+            {
+                return null;
+            }
+
+            return canvas.worldCamera;
         }
     }
 }

@@ -25,6 +25,9 @@ namespace VN.Core
         [Header("Optional Story Override")]
         [SerializeField] private string overrideStoryId;
 
+        [Header("Mouse Advance Area")]
+        [SerializeField] private string mouseAdvanceAreaObjectName = "InputSquare";
+
         private async void Awake()
         {
             await BootstrapAsync();
@@ -69,13 +72,14 @@ namespace VN.Core
 
             try
             {
+                GameObject viewStoryTopInstance = null;
                 var characterStage = FindFirstObjectByType<CharacterStageController>(FindObjectsInactive.Include);
                 var dialogue = FindFirstObjectByType<DialogueUIController>(FindObjectsInactive.Include);
                 var choice = FindFirstObjectByType<ChoiceUIController>(FindObjectsInactive.Include);
 
                 if (characterStage == null || dialogue == null || choice == null)
                 {
-                    var viewStoryTopInstance = await InstantiatePrefabAsync(viewStoryTopPrefabAddress, viewStoryTopParent);
+                    viewStoryTopInstance = await InstantiatePrefabAsync(viewStoryTopPrefabAddress, viewStoryTopParent);
                     if (viewStoryTopInstance == null)
                     {
                         Debug.LogError("[VNGameBootstrap] ViewStoryTop prefab could not be instantiated. Boot aborted.");
@@ -104,6 +108,19 @@ namespace VN.Core
                     input,
                     loadingUi);
 
+                if (input != null)
+                {
+                    var mouseAdvanceArea = FindMouseAdvanceArea(viewStoryTopInstance);
+                    if (mouseAdvanceArea != null)
+                    {
+                        input.SetMouseAdvanceArea(mouseAdvanceArea);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[VNGameBootstrap] Mouse advance area '{mouseAdvanceAreaObjectName}' not found in ViewStoryTop.");
+                    }
+                }
+
                 if (!string.IsNullOrWhiteSpace(overrideStoryId))
                 {
                     controller.SetStoryId(overrideStoryId);
@@ -116,6 +133,54 @@ namespace VN.Core
                     controller.enabled = true;
                 }
             }
+        }
+
+        private RectTransform FindMouseAdvanceArea(GameObject viewStoryTopInstance)
+        {
+            if (string.IsNullOrWhiteSpace(mouseAdvanceAreaObjectName))
+            {
+                return null;
+            }
+
+            if (viewStoryTopInstance != null)
+            {
+                var areaInNewView = FindRectTransformByName(viewStoryTopInstance.transform, mouseAdvanceAreaObjectName);
+                if (areaInNewView != null)
+                {
+                    return areaInNewView;
+                }
+            }
+
+            var allRectTransforms = FindObjectsOfType<RectTransform>(true);
+            for (var i = 0; i < allRectTransforms.Length; i++)
+            {
+                var rect = allRectTransforms[i];
+                if (rect != null && rect.name == mouseAdvanceAreaObjectName)
+                {
+                    return rect;
+                }
+            }
+
+            return null;
+        }
+
+        private static RectTransform FindRectTransformByName(Transform root, string targetName)
+        {
+            if (root == null || string.IsNullOrWhiteSpace(targetName))
+            {
+                return null;
+            }
+
+            var rects = root.GetComponentsInChildren<RectTransform>(true);
+            for (var i = 0; i < rects.Length; i++)
+            {
+                if (rects[i] != null && rects[i].name == targetName)
+                {
+                    return rects[i];
+                }
+            }
+
+            return null;
         }
 
         private async Task<GameObject> InstantiatePrefabAsync(string address, Transform parent)

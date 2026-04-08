@@ -49,6 +49,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VN.Core.VNGameController
   storyId: storydata_0000001
   autoStartOnAwake: 1
+  dontDestroyOnLoad: 1
   characterStageController: {fileID: 0}
   backgroundController: {fileID: 5516950164944659980}
   dialogueUiController: {fileID: 0}
@@ -100,6 +101,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 008392da04331b440b197cafde1308dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VN.Systems.VNInputRouter
+  dontDestroyOnLoad: 1
+  restrictMouseAdvanceToArea: 1
+  mouseAdvanceArea: {fileID: 0}
 --- !u!1 &6654934467371913678
 GameObject:
   m_ObjectHideFlags: 0
