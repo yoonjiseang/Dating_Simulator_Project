@@ -470,6 +470,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &782268058
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 782268059}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &782268059
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 782268058}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1120.1198, y: 548.22, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1798767811
 GameObject:
   m_ObjectHideFlags: 0
@@ -583,6 +614,14 @@ MonoBehaviour:
   viewStoryTopParent: {fileID: 507111537}
   vnGameControllerParent: {fileID: 632398138}
   overrideStoryId: storydata_0000003
+  mouseAdvanceAreaObjectName: InputSquare
+  useMainMenu: 1
+  storyMasterTableName: story_detail
+  menuTitle: Dating Simulator
+  showLockedStories: 1
+  menuControllerInScene: {fileID: 4212871621263617179, guid: 290c2f60d62494a4aa912b355d656fb0, type: 3}
+  menuControllerPrefabAddress: VN/StoryRouteMenu
+  menuControllerParent: {fileID: 507111537}
 --- !u!4 &2094670768
 Transform:
   m_ObjectHideFlags: 0
@@ -608,3 +647,4 @@ SceneRoots:
   - {fileID: 507111537}
   - {fileID: 1798767814}
   - {fileID: 632398138}
+  - {fileID: 782268059}

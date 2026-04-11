@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,9 +21,9 @@ namespace VN.Controllers
             }
         }
 
-        public IEnumerator ShowChoices(ChoiceOptionData[] options, Action<ChoiceOptionData> onSelected)
+        public IEnumerator ShowChoices(IReadOnlyList<ChoiceOptionData> options, Action<ChoiceOptionData> onSelected)
         {
-            if (root == null || optionButtonPrefab == null || options == null || options.Length == 0)
+            if (root == null || optionButtonPrefab == null || options == null || options.Count == 0)
             {
                 yield break;
             }
@@ -34,8 +35,14 @@ namespace VN.Controllers
             }
 
             var selected = false;
-            foreach (var option in options)
+            for (var i = 0; i < options.Count; i++)
             {
+                var option = options[i];
+                if (option == null)
+                {
+                    continue;
+                }
+
                 var button = Instantiate(optionButtonPrefab, root);
                 var tmpText = button.GetComponentInChildren<TMP_Text>();
                 if (tmpText != null)
@@ -53,7 +60,11 @@ namespace VN.Controllers
 
                 button.onClick.AddListener(() =>
                 {
-                    if (selected) return;
+                    if (selected)
+                    {
+                        return;
+                    }
+
                     selected = true;
                     onSelected?.Invoke(option);
                 });

@@ -7,6 +7,7 @@ namespace VN.Data
     {
         public string text;
         public string jump;
+        public string condition;
         public VariableMutationData set;
     }
 }

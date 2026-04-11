@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using GameFlow;
 using VN.Controllers;
 using VN.Systems;
 
@@ -33,6 +34,7 @@ namespace VN.Core
         private CommandProcessor _processor;
         private SaveLoadManager _saveLoadManager;
         private Coroutine _processorCoroutine;
+        private Coroutine _storyEndWatchCoroutine;
 
         private void Awake()
         {
@@ -66,6 +68,12 @@ namespace VN.Core
                 StopCoroutine(_processorCoroutine);
                 _processorCoroutine = null;
             }
+
+            if (_storyEndWatchCoroutine != null)
+            {
+                StopCoroutine(_storyEndWatchCoroutine);
+                _storyEndWatchCoroutine = null;
+            }
         }
 
         private IEnumerator Start()
@@ -95,6 +103,7 @@ namespace VN.Core
             _runtime = new StoryRuntime();
             _resourceProvider = new ResourceProvider();
             _variableStore = new VariableStore();
+            StorySelectionState.ApplyProgressToVariables(_variableStore);
             _saveLoadManager = new SaveLoadManager();
 
             dialogueUiController.Initialize(inputRouter);
@@ -126,6 +135,7 @@ namespace VN.Core
 
             SetLoadingVisible(false);
             _processorCoroutine = StartCoroutine(_processor.Run());
+            _storyEndWatchCoroutine = StartCoroutine(WatchStoryEnd());
         }
         
         public void ConfigureDependencies(
@@ -190,6 +200,12 @@ namespace VN.Core
                     _processorCoroutine = null;
                 }
 
+                if (_storyEndWatchCoroutine != null)
+                {
+                    StopCoroutine(_storyEndWatchCoroutine);
+                    _storyEndWatchCoroutine = null;
+                }
+
                 yield return StartCoroutine(_saveLoadManager.Load(
                     slot,
                     _runtime,
@@ -211,6 +227,7 @@ namespace VN.Core
                         audioController);
 
                     _processorCoroutine = StartCoroutine(_processor.Run());
+                    _storyEndWatchCoroutine = StartCoroutine(WatchStoryEnd());
                 }
             }
             finally
@@ -219,6 +236,21 @@ namespace VN.Core
                 UpdateLoadingProgress(1f);
                 inputRouter?.ReleaseInputBlock();
             }
+        }
+
+        private IEnumerator WatchStoryEnd()
+        {
+            while (_runtime != null && !_runtime.IsEnded)
+            {
+                yield return null;
+            }
+
+            if (!string.IsNullOrWhiteSpace(StorySelectionState.SelectedRouteId))
+            {
+                GameProgressStore.MarkRouteCleared(StorySelectionState.SelectedRouteId);
+            }
+
+            _storyEndWatchCoroutine = null;
         }
 
         private void ResolveOptionalDependencies()

@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using GameFlow;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -8,11 +10,6 @@ using VN.Systems;
 
 namespace VN.Core
 {
-    /// <summary>
-    /// Boot scene installer:
-    /// 1) Instantiates ViewStoryTop + VNGameController prefabs from Addressables keys
-    /// 2) Wires controllers inside ViewStoryTop into VNGameController
-    /// </summary>
     public class VNGameBootstrap : MonoBehaviour
     {
         [Header("Addressable Keys")]
@@ -29,9 +26,141 @@ namespace VN.Core
         [Header("Mouse Advance Area")]
         [SerializeField] private string mouseAdvanceAreaObjectName = "InputSquare";
 
+        [Header("Main Menu from MasterData")]
+        [SerializeField] private bool useMainMenu = true;
+        [SerializeField] private string storyMasterTableName = "story_detail";
+        [SerializeField] private string menuTitle = "Dating Simulator";
+        [SerializeField] private bool showLockedStories = true;
+
+        [Header("Main Menu View")]
+        [Tooltip("Scene instance or prefab asset 모두 허용. Prefab asset이면 부트 시 런타임 인스턴스로 생성됩니다.")]
+        [SerializeField] private StoryRouteMenuController menuControllerInScene;
+        [SerializeField] private string menuControllerPrefabAddress = "VN/StoryRouteMenu";
+        [SerializeField] private Transform menuControllerParent;
+
         private async void Awake()
         {
+            if (useMainMenu)
+            {
+                var selectedRoute = await ShowMainMenuAsync();
+                if (selectedRoute == null)
+                {
+                    return;
+                }
+
+                StorySelectionState.SetSelectedRoute(selectedRoute.routeId, selectedRoute.storyId);
+                if (!string.IsNullOrWhiteSpace(selectedRoute.storyId))
+                {
+                    overrideStoryId = selectedRoute.storyId;
+                }
+            }
+
             await BootstrapAsync();
+        }
+
+        private async Task<StoryRouteEntry> ShowMainMenuAsync()
+        {
+            var routes = await LoadRoutesFromMasterDataAsync();
+            if (routes.Count == 0)
+            {
+                routes = StoryRouteCatalogLoader.CreateFallbackCatalog();
+            }
+
+            var menuController = await ResolveMenuControllerAsync();
+            if (menuController == null)
+            {
+                Debug.LogError("[VNGameBootstrap] StoryRouteMenuController is not available. Main menu cannot open.");
+                return null;
+            }
+
+            var progressVariables = CreateProgressVariableStore();
+            var selected = await menuController.ShowAsync(routes, progressVariables, DateTime.UtcNow, menuTitle, showLockedStories);
+            menuController.Hide();
+            return selected;
+        }
+
+        private async Task<StoryRouteMenuController> ResolveMenuControllerAsync()
+        {
+            var parent = ResolveMenuControllerParent();
+
+            if (menuControllerInScene == null)
+            {
+                menuControllerInScene = FindFirstObjectByType<StoryRouteMenuController>(FindObjectsInactive.Include);
+            }
+            else if (!menuControllerInScene.gameObject.scene.IsValid())
+            {
+                menuControllerInScene = Instantiate(menuControllerInScene, parent);
+                menuControllerInScene.transform.SetParent(parent, false);
+                menuControllerInScene.gameObject.name = "StoryRouteMenuController_Runtime";
+            }
+
+            if (menuControllerInScene != null)
+            {
+                return menuControllerInScene;
+            }
+
+            if (string.IsNullOrWhiteSpace(menuControllerPrefabAddress))
+            {
+                return null;
+            }
+
+            
+            var menuInstance = await InstantiatePrefabAsync(menuControllerPrefabAddress, parent);
+            if (menuInstance == null)
+            {
+                return null;
+            }
+
+            menuControllerInScene = menuInstance.GetComponent<StoryRouteMenuController>()
+                                 ?? menuInstance.GetComponentInChildren<StoryRouteMenuController>(true);
+            return menuControllerInScene;
+        }
+
+        private Transform ResolveMenuControllerParent()
+        {
+            if (menuControllerParent != null)
+            {
+                if (menuControllerParent.gameObject.scene.IsValid())
+                {
+                    return menuControllerParent;
+                }
+
+                Debug.LogWarning("[VNGameBootstrap] menuControllerParent is not a scene object. Falling back to scene Canvas.");
+            }
+
+            if (viewStoryTopParent != null && viewStoryTopParent.gameObject.scene.IsValid())
+            {
+                return viewStoryTopParent;
+            }
+
+            var canvas = FindFirstObjectByType<Canvas>(FindObjectsInactive.Include);
+            if (canvas != null)
+            {
+                return canvas.transform;
+            }
+
+            return transform;
+        }
+
+        private async Task<List<StoryRouteEntry>> LoadRoutesFromMasterDataAsync()
+        {
+            var provider = new MasterDataProvider();
+            var table = await provider.LoadTableAsync(storyMasterTableName);
+            var routes = StoryRouteCatalogLoader.LoadFromMasterData(table);
+
+            if (routes.Count == 0)
+            {
+                Debug.LogWarning($"[VNGameBootstrap] Could not load routes from MDB/{storyMasterTableName}. Using fallback route.");
+            }
+
+            return routes;
+        }
+
+        private static VariableStore CreateProgressVariableStore()
+        {
+            var variables = new VariableStore();
+            variables.Apply("totalClearCount", "set", GameProgressStore.GetTotalClearCount());
+            return variables;
         }
 
         private async Task BootstrapAsync()
@@ -63,8 +192,6 @@ namespace VN.Core
                 return;
             }
 
-            // Addressables loading is async. Prevent VNGameController.Start from running
-            // before dependencies are wired.
             controllerWasEnabled = controller.enabled;
             if (controllerWasEnabled)
             {
@@ -100,14 +227,7 @@ namespace VN.Core
                 var input = VNInputRouter.Instance ?? FindFirstObjectByType<VNInputRouter>(FindObjectsInactive.Include);
                 var loadingUi = FindFirstObjectByType<LoadingUIController>(FindObjectsInactive.Include);
 
-                controller.ConfigureDependencies(
-                    characterStage,
-                    background,
-                    dialogue,
-                    choice,
-                    audio,
-                    input,
-                    loadingUi);
+                controller.ConfigureDependencies(characterStage, background, dialogue, choice, audio, input, loadingUi);
 
                 if (input != null)
                 {
@@ -115,10 +235,6 @@ namespace VN.Core
                     if (mouseAdvanceArea != null)
                     {
                         input.SetMouseAdvanceArea(mouseAdvanceArea);
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"[VNGameBootstrap] Mouse advance area '{mouseAdvanceAreaObjectName}' not found in ViewStoryTop.");
                     }
                 }
 

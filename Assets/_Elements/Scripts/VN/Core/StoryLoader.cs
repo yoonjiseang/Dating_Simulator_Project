@@ -11,7 +11,11 @@ namespace VN.Core
 {
     public class StoryLoader
     {
-        private const string StoryRootPath = "Assets/_ElementsResources/VN/Stories";
+        private static readonly string[] EditorStoryRootPaths =
+        {
+            "Assets/_ElementsResources/GameFlow/Stories",
+            "Assets/_ElementsResources/VN/Stories"
+        };
         private const string AddressableStoryPrefix = "VN/Stories/";
 
         // Editor: Assets/_ElementsResources/VN/Stories/{storyId}.json 직접 로드
@@ -24,13 +28,24 @@ namespace VN.Core
                 return null;
             }
 
-            var assetPath = $"{StoryRootPath}/{storyId}.json";
+            string assetPath = null;
 
 #if UNITY_EDITOR
-            var asset = AssetDatabase.LoadAssetAtPath<TextAsset>(assetPath);
+            TextAsset asset = null;
+            for (var i = 0; i < EditorStoryRootPaths.Length; i++)
+            {
+                var path = $"{EditorStoryRootPaths[i]}/{storyId}.json";
+                asset = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
+                if (asset != null)
+                {
+                    assetPath = path;
+                    break;
+                }
+            }
+
             if (asset == null)
             {
-                Debug.LogError($"[StoryLoader] Story json not found at: {assetPath}");
+                Debug.LogError($"[StoryLoader] Story json not found for id: {storyId}");
                 return null;
             }
 
