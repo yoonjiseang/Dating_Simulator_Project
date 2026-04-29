@@ -9,7 +9,8 @@ namespace VN.Data
         Background,
         Bgm,
         Character,
-        Sfx
+        Sfx,
+        Story
     }
 
     [Serializable]

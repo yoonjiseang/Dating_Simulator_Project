@@ -22,7 +22,7 @@ namespace VN.Editor
         };
 
         private static readonly string[] SlotOptions = { "left", "center", "right" };
-        private static readonly string[] EffectOptions = { "", "fadeIn", "fadeOut", "shake", "angry", "punch" };
+        private static readonly string[] EffectOptions = { "", "fadeIn", "fadeOut", "shake", "angry", "punch", "pop", "zoomIn", "slideLeft", "slideRight" };
 
         [Serializable]
         private sealed class NodeDraft

@@ -23,7 +23,7 @@ namespace VN.Editor
 
         private static readonly string[] AllowedExtensions =
         {
-            ".png", ".jpg", ".jpeg", ".wav", ".mp3", ".ogg", ".prefab", ".asset"
+            ".png", ".jpg", ".jpeg", ".wav", ".mp3", ".ogg", ".prefab", ".asset", ".json"
         };
         
         private static readonly (string assetPath, string address)[] BootstrapPrefabs =
@@ -42,6 +42,7 @@ namespace VN.Editor
         public static void BuildAddressablesForCi()
         {
             VNMasterDataBuildPipeline.BuildForCi();
+            VNStoryValidator.ValidateAllStoriesForCi();
 
             var report = SyncCatalogAndAddressables();
             if (report.MissingCatalogEntries.Count > 0)
@@ -67,6 +68,7 @@ namespace VN.Editor
         public static void ValidateAddressablesForCi()
         {
             VNMasterDataBuildPipeline.ValidateForCi();
+            VNStoryValidator.ValidateAllStoriesForCi();
             
             var report = SyncCatalogAndAddressables();
             if (report.MissingCatalogEntries.Count > 0)
@@ -106,7 +108,7 @@ namespace VN.Editor
                     continue;
                 }
 
-                assetEntry.address = ToAddress(entry.relativeKey);
+                assetEntry.address = ToAddress(entry.id);
                 assetEntry.SetLabel("vn", true, true, false);
                 assetEntry.SetLabel(entry.category.ToString().ToLowerInvariant(), true, true, false);
             }
@@ -172,14 +174,15 @@ namespace VN.Editor
                     continue;
                 }
 
+                var category = ResolveCategory(relativeWithoutExt);
                 entries.Add(new VNResourceEntry
                 {
                     id = relativeWithoutExt,
                     fileName = Path.GetFileNameWithoutExtension(path),
-                    relativeKey = relativeWithoutExt,
+                    relativeKey = ToCommandResourceKey(relativeWithoutExt, category),
                     assetPath = path,
                     guid = guid,
-                    category = ResolveCategory(relativeWithoutExt)
+                    category = category
                 });
             }
 
@@ -228,7 +231,30 @@ namespace VN.Editor
                 return VNResourceCategory.Sfx;
             }
 
+            if (relativeWithoutExt.StartsWith("Stories/", StringComparison.OrdinalIgnoreCase))
+            {
+                return VNResourceCategory.Story;
+            }
+
             return VNResourceCategory.Character;
+        }
+
+        private static string ToCommandResourceKey(string relativeWithoutExt, VNResourceCategory category)
+        {
+            var normalized = relativeWithoutExt.Trim().Replace('\\', '/');
+            var prefix = category switch
+            {
+                VNResourceCategory.Background => "Backgrounds/",
+                VNResourceCategory.Bgm => "BGM/",
+                VNResourceCategory.Sfx => "SFX/",
+                VNResourceCategory.Character => "Characters/",
+                VNResourceCategory.Story => "Stories/",
+                _ => string.Empty
+            };
+
+            return !string.IsNullOrEmpty(prefix) && normalized.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+                ? normalized.Substring(prefix.Length)
+                : normalized;
         }
 
         private static void SaveCatalog(List<VNResourceEntry> entries)

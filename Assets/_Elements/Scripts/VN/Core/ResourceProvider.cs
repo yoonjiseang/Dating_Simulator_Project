@@ -40,7 +40,7 @@ namespace VN.Core
             }
 
             var normalizedCharacterId = characterId.Trim().PadLeft(4, '0');
-            var normalizedFaceKey = faceKey.Trim().PadLeft(2, '0');
+            var normalizedFaceKey = NormalizeFaceKey(normalizedCharacterId, faceKey);
             return LoadBlocking<Sprite>($"Characters/{normalizedCharacterId}/{normalizedCharacterId}_{normalizedFaceKey}");
         }
 
@@ -73,8 +73,8 @@ namespace VN.Core
                     batch[i] = preloadTasks[offset + i]();
                 }
 
-            var allTask = Task.WhenAll(batch);
-            yield return WaitForTask(allTask);
+                var allTask = Task.WhenAll(batch);
+                yield return WaitForTask(allTask);
 
                 completedCount += count;
                 onProgress?.Invoke((float)completedCount / preloadTasks.Count, $"Preloading {completedCount}/{preloadTasks.Count}");
@@ -165,7 +165,7 @@ namespace VN.Core
                 return null;
             }
             var normalizedCharacterId = characterId.Trim().PadLeft(4, '0');
-            var normalizedFaceKey = faceKey.Trim().PadLeft(2, '0');
+            var normalizedFaceKey = NormalizeFaceKey(normalizedCharacterId, faceKey);
             return await LoadAssetAsync<Sprite>($"Characters/{normalizedCharacterId}/{normalizedCharacterId}_{normalizedFaceKey}");
         }
 
@@ -236,7 +236,7 @@ namespace VN.Core
                 if (result == null)
                 {
                     Debug.LogError($"[ResourceProvider] Addressables returned null for key: {normalizedRelative}");
-                    _handles.Remove(normalizedRelative);
+                    ReleaseHandle(normalizedRelative);
                     return null;
                 }
 
@@ -254,8 +254,7 @@ namespace VN.Core
                 Debug.LogError($"[ResourceProvider] Failed to load addressable asset: {normalizedRelative}\n{ex}");
                 if (_handles.TryGetValue(normalizedRelative, out var cachedHandle))
                 {
-                    Addressables.Release(cachedHandle);
-                    _handles.Remove(normalizedRelative);
+                    ReleaseHandle(normalizedRelative, cachedHandle);
                 }
 
                 return null;
@@ -310,11 +309,43 @@ namespace VN.Core
             return result as T;
         }
 
+        private void ReleaseHandle(string normalizedRelative)
+        {
+            if (_handles.TryGetValue(normalizedRelative, out var handle))
+            {
+                ReleaseHandle(normalizedRelative, handle);
+            }
+        }
+
+        private void ReleaseHandle(string normalizedRelative, AsyncOperationHandle handle)
+        {
+            if (handle.IsValid())
+            {
+                Addressables.Release(handle);
+            }
+
+            _handles.Remove(normalizedRelative);
+        }
+
         private static string ToAddress(string normalizedRelativeKey) => AddressPrefix + normalizedRelativeKey;
 
         private static string NormalizeRelativeKey(string relativeKey)
         {
             return relativeKey.Trim().Replace('\\', '/');
+        }
+
+        private static string NormalizeFaceKey(string normalizedCharacterId, string faceKey)
+        {
+            var normalizedFaceKey = faceKey.Trim();
+            var spriteNamePrefix = normalizedCharacterId + "_";
+            if (normalizedFaceKey.StartsWith(spriteNamePrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                normalizedFaceKey = normalizedFaceKey.Substring(spriteNamePrefix.Length);
+            }
+
+            return int.TryParse(normalizedFaceKey, out _)
+                ? normalizedFaceKey.PadLeft(2, '0')
+                : normalizedFaceKey;
         }
 
         public void ReleaseAll()

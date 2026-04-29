@@ -27,6 +27,9 @@ namespace VN.Controllers
         [SerializeField] private float defaultPunchDuration = 0.3f;
         [SerializeField] private float defaultPunchAmplitude = 60f;
         [SerializeField] private int defaultPunchCount = 2;
+        [SerializeField] private float defaultPopScale = 1.08f;
+        [SerializeField] private float defaultZoomStartScale = 0.92f;
+        [SerializeField] private float defaultSlideDistance = 360f;
 
         private readonly Dictionary<string, CharacterView> _views = new();
 
@@ -161,6 +164,18 @@ namespace VN.Controllers
                 case "punch":
                     yield return PunchVertical(root, duration > 0f ? duration : defaultPunchDuration, defaultPunchAmplitude, defaultPunchCount);
                     break;
+                case "pop":
+                    yield return PopScale(root, duration > 0f ? duration : defaultPunchDuration, defaultPopScale);
+                    break;
+                case "zoomin":
+                    yield return ZoomIn(root, duration > 0f ? duration : defaultPunchDuration, defaultZoomStartScale);
+                    break;
+                case "slideleft":
+                    yield return SlideHorizontal(root, duration > 0f ? duration : defaultFadeDuration, defaultSlideDistance);
+                    break;
+                case "slideright":
+                    yield return SlideHorizontal(root, duration > 0f ? duration : defaultFadeDuration, -defaultSlideDistance);
+                    break;
                 default:
                     if (duration > 0f)
                     {
@@ -268,6 +283,102 @@ namespace VN.Controllers
             target.anchoredPosition = basePosition;
         }
 
+        private static IEnumerator PopScale(RectTransform target, float duration, float overshootScale)
+        {
+            if (target == null)
+            {
+                yield break;
+            }
+
+            var baseScale = target.localScale;
+            if (duration <= 0f || overshootScale <= 1f)
+            {
+                target.localScale = baseScale;
+                yield break;
+            }
+
+            var peakScale = baseScale * overshootScale;
+            var elapsed = 0f;
+            var peakTime = duration * 0.45f;
+            while (elapsed < peakTime)
+            {
+                elapsed += Time.deltaTime;
+                var t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / peakTime));
+                target.localScale = Vector3.Lerp(baseScale, peakScale, t);
+                yield return null;
+            }
+
+            elapsed = 0f;
+            var settleTime = Mathf.Max(0.01f, duration - peakTime);
+            while (elapsed < settleTime)
+            {
+                elapsed += Time.deltaTime;
+                var t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / settleTime));
+                target.localScale = Vector3.Lerp(peakScale, baseScale, t);
+                yield return null;
+            }
+
+            target.localScale = baseScale;
+        }
+
+        private static IEnumerator ZoomIn(RectTransform target, float duration, float startScale)
+        {
+            if (target == null)
+            {
+                yield break;
+            }
+
+            var baseScale = target.localScale;
+            if (duration <= 0f || startScale <= 0f)
+            {
+                target.localScale = baseScale;
+                yield break;
+            }
+
+            var fromScale = baseScale * startScale;
+            var elapsed = 0f;
+            target.localScale = fromScale;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                var t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / duration));
+                target.localScale = Vector3.Lerp(fromScale, baseScale, t);
+                yield return null;
+            }
+
+            target.localScale = baseScale;
+        }
+
+        private static IEnumerator SlideHorizontal(RectTransform target, float duration, float distance)
+        {
+            if (target == null)
+            {
+                yield break;
+            }
+
+            var basePosition = target.anchoredPosition;
+            if (duration <= 0f || Mathf.Approximately(distance, 0f))
+            {
+                target.anchoredPosition = basePosition;
+                yield break;
+            }
+
+            var fromPosition = basePosition + Vector2.right * distance;
+            var elapsed = 0f;
+            target.anchoredPosition = fromPosition;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                var t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / duration));
+                target.anchoredPosition = Vector2.Lerp(fromPosition, basePosition, t);
+                yield return null;
+            }
+
+            target.anchoredPosition = basePosition;
+        }
+
         private static string NormalizeEffectKey(string key)
         {
             if (string.IsNullOrWhiteSpace(key))
@@ -285,6 +396,10 @@ namespace VN.Controllers
                 "shake" => "shake",
                 "angry" => "angry",
                 "punch" => "punch",
+                "pop" => "pop",
+                "zoomin" => "zoomin",
+                "slideleft" => "slideleft",
+                "slideright" => "slideright",
                 _ => normalized
             };
         }

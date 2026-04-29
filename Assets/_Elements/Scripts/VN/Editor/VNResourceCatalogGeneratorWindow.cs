@@ -21,7 +21,8 @@ namespace VN.Editor
             new("Backgrounds", VNResourceCategory.Background, new[] { ".png", ".jpg", ".jpeg" }),
             new("BGM", VNResourceCategory.Bgm, new[] { ".wav", ".mp3", ".ogg" }),
             new("Characters", VNResourceCategory.Character, new[] { ".png", ".jpg", ".jpeg", ".wav", ".mp3", ".ogg" }),
-            new("SFX", VNResourceCategory.Sfx, new[] { ".wav", ".mp3", ".ogg" })
+            new("SFX", VNResourceCategory.Sfx, new[] { ".wav", ".mp3", ".ogg" }),
+            new("Stories", VNResourceCategory.Story, new[] { ".json" })
         };
 
         [SerializeField] private string catalogPath = DefaultCatalogPath;

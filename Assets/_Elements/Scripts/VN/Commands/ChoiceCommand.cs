@@ -17,7 +17,7 @@ namespace VN.Commands
 
             yield return context.ChoiceUI.ShowChoices(filteredOptions, option =>
             {
-                if (option?.set != null)
+                if (HasVariableMutation(option?.set))
                 {
                     context.Variables.Apply(option.set.name, option.set.op, option.set.value);
                 }
@@ -52,6 +52,13 @@ namespace VN.Commands
             }
 
             return filtered;
+        }
+
+        private static bool HasVariableMutation(VariableMutationData mutation)
+        {
+            return mutation != null &&
+                   (!string.IsNullOrWhiteSpace(mutation.name) ||
+                    !string.IsNullOrWhiteSpace(mutation.op));
         }
     }
 }

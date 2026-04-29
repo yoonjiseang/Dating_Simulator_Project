@@ -141,6 +141,13 @@ MonoBehaviour:
     - background
     - vn
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 66fe6601f53b41b408fc00b28346cffc
+    m_Address: VN/Stories/storydata_0000003
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - story
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 67c595eb5a518d64f93adfef79c2dcad
     m_Address: VN/Characters/0020/0020_01
     m_ReadOnly: 0
@@ -174,6 +181,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - character
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7ccd83dd75bed61499d591526c4c2203
+    m_Address: VN/Stories/storydata_0000001
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - story
     - vn
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7f3458a1c5432874295db51f986d7dfa
@@ -246,6 +260,13 @@ MonoBehaviour:
     - background
     - vn
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a9b04916a153c5545a8b454b82cc79c1
+    m_Address: VN/Stories/storydata_0000002
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - story
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a9c74e9e88a13f447beab67c375164a8
     m_Address: VN/VNGameController
     m_ReadOnly: 0
@@ -286,6 +307,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - background
+    - vn
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c205ffcc6cc94394490ae50d8455570d
+    m_Address: VN/Stories/storydata_0000004
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - story
     - vn
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c7f0d940df21591458a8eb12713e3abb

@@ -268,7 +268,7 @@ namespace VN.Core
                 }
             }
 
-            var allRectTransforms = FindObjectsOfType<RectTransform>(true);
+            var allRectTransforms = FindObjectsByType<RectTransform>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             for (var i = 0; i < allRectTransforms.Length; i++)
             {
                 var rect = allRectTransforms[i];
